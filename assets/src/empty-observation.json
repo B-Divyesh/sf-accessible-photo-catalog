@@ -1,0 +1,8 @@
+{
+  "tool": "/opt/fleet/lib/gen-image.sh",
+  "deployment": "factory-image",
+  "date": "2026-08-28",
+  "size": "1536x1024",
+  "quality": "high",
+  "prompt": "An empty art-deco railway observation lounge arranged as a private photo sorting desk, abstract blank photographic prints moving along three clear route lines toward three unlabeled geometric trays, no people. 1930s transit-poster geometry, screen-printed warm ticket cream paper, midnight rail blue ink, signal vermilion blocks, aged brass linework, forest green accents, subtle paper grain. Centered sunrise aperture, frontal orthographic poster composition, bold negative space, crisp silhouettes, calm high-contrast light, flat graphic shapes, not a user interface screenshot. No text, no letters, no numbers, no watermark, no logo, no brand, no people, no faces, no hands, no gradients, no device mockups, no signage, no copyrighted characters, no thin low-contrast details."
+}

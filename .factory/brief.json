@@ -1,0 +1,10 @@
+{
+  "slug": "accessible-photo-catalog",
+  "title": "Large Type Catalog",
+  "territory": "utilities",
+  "user": "A low-vision knowledge worker or older family member who needs to inspect and sort a local photo collection with reliably large controls and keyboard/voice-friendly operations.",
+  "smallest_useful_product": "Local browser catalog for one folder: huge thumbnails, adjustable contrast and text, keyboard-only keep/reject/tag/rename queue, and CSV sidecar export.",
+  "artifact_class": "pwa-offline",
+  "monetization": "free",
+  "constraints": "WCAG 2.2 AA where applicable; local files never uploaded; reduced motion supported."
+}
