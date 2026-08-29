@@ -1,3 +1,45 @@
+# Review handoff — 2026-08-29
+
+**Work order:** `accessible-photo-catalog-review-1`
+**Role:** independent adversarial reviewer
+**Result:** **FAIL**
+
+No product code was changed. The full review is in
+[`review-1.md`](review-1.md). It records 14 findings, including two blocking
+findings: an exposed-heading/focus failure on `/demo`, and an untested
+Chromium/Firefox/Safari compatibility claim in the README.
+
+Verification completed in this review:
+
+- Fresh live Chromium checks at 390×844 and 1440×1000; first screen is clear
+  and has no horizontal overflow.
+- `/demo` was entered directly from a fresh context. It immediately displayed
+  three realistic samples, a persistent demo banner, Reset demo, and Start for
+  real. Demo storage was `demo:large-type-catalog` plus `demo:` local keys;
+  observed requests were same-origin only.
+- Every one of the 11 commands in `.factory/claims.json` passed independently
+  against `https://accessible-photo-catalog.sociobot.in`.
+- `npm test` passed 9/9; `npm run build` produced `dist/`; the complete local
+  Playwright suite exercised all 16 listed tests without a reported failure.
+- Live route, metadata, response-header, link, 404, title, h1, and footer
+  checks were run. The review documents the cases that still fail the stated
+  product contract.
+
+To reproduce the finding checks:
+
+```sh
+npm ci
+npm test
+npm run build
+PLAYWRIGHT_BASE_URL=https://accessible-photo-catalog.sociobot.in npm run test:e2e
+```
+
+Then read `.factory/review-1.md` and implement/retest every listed fix before
+requesting another review. Historical verification records are retained below
+for traceability; their PASS is superseded by this later review.
+
+---
+
 # Independent verification handoff — PASS
 
 **Independent verifier work order:** `accessible-photo-catalog-verify-2`
