@@ -39,6 +39,8 @@ Each of the 11 commands in `.factory/claims.json` then passed independently:
 `demo-isolation`, `local-only`, `keyboard-workflow`, `csv-export`,
 `browser-persistence`, `pwa-install`, `offline-reload`, `backup-roundtrip`,
 `original-files-safe`, `accessible-display`, and `filter-undo`.
+The demo-isolation test also directly verifies the `?demo=1` sample URL,
+including its banner and visible sample-catalog heading.
 
 After deployment, `PLAYWRIGHT_BASE_URL=https://accessible-photo-catalog.sociobot.in npm run test:e2e`
 passed all 18 tests. This includes the claim, privacy request, offline,

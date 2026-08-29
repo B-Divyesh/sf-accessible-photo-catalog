@@ -13,7 +13,7 @@ and [`demo/verify.json`](evidence/polish-1/demo/verify.json).
 
 | Finding | Change made | Evidence |
 | --- | --- | --- |
-| F-1-1 | Kept exactly one h1 and move it into the populated workspace as visible **Sample photo catalog**. Direct `/demo`, hero navigation, and Back now focus it and announce the route. | `demo exposes and focuses its route heading on direct, linked, and history navigation`; live 18-test run; demo screenshot/verify JSON. |
+| F-1-1 | Kept exactly one h1 and move it into the populated workspace as visible **Sample photo catalog**. Direct `/demo`, `?demo=1`, hero navigation, and Back now focus or expose the route heading and announce the route. | `demo exposes and focuses its route heading on direct, linked, and history navigation`; `@claim:demo-isolation`; live 18-test run; demo screenshot/verify JSON. |
 | F-1-2 | Added Demo, Privacy, and Terms to the shared header on app, legal, and 404 routes, with current-page state. | `shared header navigation and the 404 skip link work on every route`; live 18-test run; root screenshot. |
 | F-1-3 | Added `id="main"` to the 404 main landmark and tested activation of the skip link. | `shared header navigation and the 404 skip link work on every route`; live 18-test run. |
 | F-1-4 | Added **How it works** with three concrete steps and **What this catalog does not do** with the original-file boundary. | `all routes have metadata, landmarks, one h1, alt text, and no serious axe findings`; live root screenshot; `@claim:local-only` and `@claim:original-files-safe`. |

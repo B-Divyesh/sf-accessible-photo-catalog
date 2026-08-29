@@ -34,6 +34,10 @@ test('@claim:demo-isolation keeps sample work separate and resets it', async ({ 
   await expect(page).toHaveURL(/\/$/);
   await expect(page.getByRole('heading', { name: 'Sort local photos with large controls' })).toBeVisible();
   expect(await page.evaluate(() => Object.keys(localStorage).some((key) => key.startsWith('demo:')))).toBe(false);
+  await page.goto('/?demo=1');
+  await expect(page).toHaveTitle('Demo — Large Type Catalog');
+  await expect(page.getByText('Demo — sample data, nothing is saved', { exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Sample photo catalog' })).toBeVisible();
 });
 
 test('@claim:local-only sends no catalog data off origin', async ({ page, baseURL }) => {
