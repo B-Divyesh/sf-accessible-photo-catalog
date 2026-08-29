@@ -29,7 +29,8 @@ describe('release contract', () => {
     };
     expect(config.routes.find((route) => route.route === '/demo')?.rewrite).toBe('/index.html');
     expect(config.routes.find((route) => route.route === '/assets/*')?.headers?.['Cache-Control']).toContain('immutable');
-    expect(config.routes.find((route) => route.route === '/manifest.webmanifest')?.headers?.['Content-Type']).toContain('application/manifest+json');
+    expect(config.routes.find((route) => route.route === '/manifest.webmanifest')?.rewrite).toBe('/manifest.json');
+    expect(JSON.parse(readFileSync('public/manifest.webmanifest', 'utf8'))).toEqual(JSON.parse(readFileSync('public/manifest.json', 'utf8')));
     expect(config.responseOverrides['404'].rewrite).toBe('/404.html');
     expect(config.globalHeaders['Content-Security-Policy']).toContain("frame-ancestors 'none'");
     expect(config.globalHeaders['Permissions-Policy']).toContain('camera=()');
