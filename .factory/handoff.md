@@ -1,59 +1,35 @@
-# Polish 3 handoff — PASS
+# Verification 6 handoff — PASS
 
-**Base:** `f562208e40c37ac45dc18d6dd6bedd43f9be4def`
-
-**Repair:** `be3a66d9fcd5d8eee09ccdaa26affc336b6ba378`
-
-**Deployment:** `2319b363-4ec7-4d23-9362-d0a3995573b8`
-
+**Candidate:** `6e2e56119ccdfd5412654fbb995641f045232e24`
 **Live:** <https://accessible-photo-catalog.sociobot.in/>
-
 **Verified:** 2026-08-29
+**Result:** **PASS — release acceptable.**
 
-## Delivered
+## What was independently verified
 
-- Closed F-3-1 through F-3-6 and rechecked all 25 earlier findings.
-- Put the sample image and `coastal-train.svg` inside the initial 390×844 demo
-  viewport while retaining the demo banner, Reset, Start for real, and 44px
-  targets.
-- Strengthened demo isolation with a byte-for-byte real IndexedDB marker check.
-- Added the registered `preference-persistence` claim and its single tagged
-  sandbox test.
-- Rebuilt `/offline.html` as a real Vite route with the shared shell, metadata,
-  focus behavior, legal links, and service-worker precaching.
-- Removed unprovable log-retention and future-policy wording from Privacy.
-- Updated the copy audit, demo notes, claims registry, release version, and the
-  97-character verb-first catalog description.
-- Preserved the art-deco observation-deck identity and static offline-PWA class.
+- Fresh clean checkout and `npm ci`; no product code was changed.
+- All 17 exact `.factory/claims.json` demo-entry commands passed separately.
+- `npm test` (9), typecheck, lint, exact production build, local Playwright (32), and live Playwright (32) all passed.
+- The live first screen clearly says what the catalog does, for whom, and to click **Try it with sample data**. One click opens a resettable, separately stored sample catalog.
+- Desktop and 390px mobile keyboard workflows, invalid backup recovery, high-contrast text sizing, reduced motion, focus, offline reload, service-worker update, headers, caching, requests, cookies, and axe were checked.
+- Fresh `dist/` bytes and live bytes match for the HTML, app/CSS assets, service worker, and manifest. The deployed site is this candidate.
 
-## Exact verification
+## Evidence and result
 
-- Clean no-hardlink clone of `be3a66d`: `npm ci` passed with 0 vulnerabilities.
-- All 17 `.factory/claims.json` commands passed separately, one test each.
-- `npm test`: 9/9 passed.
-- `npm run typecheck`: passed.
-- `npm run lint`: passed.
-- `npm run build`: passed and produced `dist/`.
-- Clean-clone `npm run test:e2e`: 32/32 passed.
-- Live `PLAYWRIGHT_BASE_URL=... npm run test:e2e`: 32/32 passed.
-- Integrated axe: zero serious or critical findings across all route states.
-- `verify-url.sh`: root, demo, Privacy, offline, and 404 passed with no console
-  errors, one `h1`, `lang=en`, a main landmark, and complete image alternatives.
-- Live privacy/request probe: only
-  `https://accessible-photo-catalog.sociobot.in` appeared as a request origin;
-  no page or console error occurred.
-- Offline reload, service-worker control, standalone manifest, 200% text reflow,
-  reduced motion, high contrast, dialog Escape, 44px targets, and malformed
-  backup recovery all passed in the browser suite.
-- Production size: 32,382 B JS and 23,881 B CSS uncompressed.
-- Live Lighthouse: Performance 100, Accessibility 100, Best Practices 100,
-  SEO 100; FCP 0.966 s, LCP 1.352 s, TBT 28 ms, CLS 0, 97,455 B transferred.
-- Live and `dist/` SHA-256 matched for `index.html`, `offline.html`, app JS,
-  CSS, `sw.js`, and `manifest.webmanifest`. An unknown live route returned 404.
+No P0, P1, or P2 findings remain. The only observation is that Lighthouse printed a post-report Chromium tab-crash message after producing a valid 98/100/100/100 report; Playwright recorded no product console or page errors. The generic `verify-url.sh` mentioned by the attached checklist is not in this repository; equivalent checks passed through the live route suite and an independent axe/semantic/console/request probe.
 
-Run locally with `npm ci && npm test && npm run build && npm run test:e2e`.
-The full finding-to-evidence map is in `.factory/polish-3.md`.
+See [verification-6.md](verification-6.md) for the full claim table, command results, privacy evidence, cache/headers, PWA details, and SHA-256 values.
 
-## Known gaps and next steps
+## How to repeat
 
-None identified. No review finding of any severity remains unresolved.
+```sh
+npm ci
+npm test
+npm run typecheck
+npm run lint
+npm run build
+npm run test:e2e
+PLAYWRIGHT_BASE_URL=https://accessible-photo-catalog.sociobot.in npm run test:e2e
+```
+
+There are no known product gaps or next steps for this candidate.
