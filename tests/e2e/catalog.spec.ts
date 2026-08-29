@@ -86,9 +86,9 @@ for (const viewport of [
       page.getByRole('heading', { name: 'Sort local photos with large controls' }),
       page.getByText('For low-vision people and older family members who need a clear way to sort one photo folder.'),
       page.getByRole('link', { name: 'Try it with sample data' }),
-      page.getByText('The sample opens at once. Your folder opens only after you choose it.'),
-      page.getByText('Stays on this device'),
-      page.getByText('Full keyboard route'),
+      page.getByText('It opens three sample photos. Your folder opens only after you choose it.'),
+      page.locator('.trust-list li').first(),
+      page.getByText('Works with a keyboard'),
       page.getByText('Works offline'),
     ];
     for (const item of firstRead) {

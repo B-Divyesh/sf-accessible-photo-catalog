@@ -26,7 +26,22 @@ test('@claim:demo-isolation keeps sample work separate and resets it', async ({ 
   await page.getByRole('radio', { name: 'Largest' }).check();
   await page.getByRole('button', { name: 'Close display settings' }).click();
   await page.getByRole('button', { name: 'Reset demo' }).click();
-  await expect(page.locator('#status-ticket')).toHaveText('Keep');
+  await expect(page.locator('#status-ticket')).toHaveText('Review');
+  const resetOrder = await page.locator('.thumbnail').evaluateAll((items) => items.map((item) => item.getAttribute('aria-label')));
+  expect(resetOrder).toEqual([
+    expect.stringContaining('coastal-train.svg'),
+    expect.stringContaining('family-picnic.svg'),
+    expect.stringContaining('garden-birthday.svg'),
+  ]);
+  await page.reload();
+  await expect(page.locator('.thumbnail').evaluateAll((items) => items.map((item) => item.getAttribute('aria-label')))).resolves.toEqual(resetOrder);
+  await page.evaluate(() => navigator.serviceWorker.ready);
+  await page.reload();
+  await expect.poll(() => page.evaluate(() => Boolean(navigator.serviceWorker.controller))).toBe(true);
+  await page.context().setOffline(true);
+  await page.reload();
+  await expect(page.locator('.thumbnail').evaluateAll((items) => items.map((item) => item.getAttribute('aria-label')))).resolves.toEqual(resetOrder);
+  await page.context().setOffline(false);
   expect(await page.evaluate(() => getComputedStyle(document.documentElement).fontSize)).toBe('18px');
   expect(await page.evaluate(() => localStorage.getItem('catalog-folder'))).toBe('real-family-archive');
   expect(await page.evaluate(() => Object.keys(localStorage).filter((key) => key.startsWith('demo:')).length)).toBeGreaterThan(0);
@@ -183,13 +198,27 @@ test('@claim:accessible-display supports contrast, text size, reduced motion, an
 
 test('@claim:filter-undo filters decisions and reverses the last classification', async ({ page }) => {
   await openDemo(page);
+  await page.getByRole('button', { name: /Go to photo 2, family-picnic\.svg/ }).click();
+  await expect(page.locator('#file-name')).toHaveText('family-picnic.svg');
   await page.getByRole('button', { name: /Reject/ }).click();
   await page.locator('#filter-select').selectOption('reject');
   await expect(page.locator('#status-ticket')).toHaveText('Reject');
   await page.getByRole('button', { name: 'Undo' }).click();
-  await expect(page.getByRole('heading', { name: 'No photos at this stop' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'No photos match this filter' })).toBeVisible();
   await page.getByRole('button', { name: 'Show all photos' }).click();
-  await expect(page.locator('#status-ticket')).toHaveText('Keep');
+  await expect(page.locator('#status-ticket')).toHaveText('Review');
+  await expect(page.getByRole('button', { name: /Go to photo 2, family-picnic\.svg, Keep/ })).toBeVisible();
+});
+
+test('@claim:folder-open opens supported photos only after the chooser action', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.locator('#workspace')).toBeHidden();
+  await page.getByRole('button', { name: 'Choose your photo folder' }).click();
+  await page.locator('#folder-input').setInputFiles(photoFolder);
+  await expect(page.getByRole('heading', { name: 'Photo catalog' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Photo 1 of 2' })).toBeVisible();
+  await expect(page.locator('.thumbnail')).toHaveCount(2);
+  await expect(page.locator('#file-name')).toHaveText('first-photo.svg');
 });
 
 test('@claim:private-runtime uses no account, tracking, or third-party runtime service', async ({ page, context, baseURL }) => {
@@ -229,6 +258,24 @@ test('@claim:clear-data removes saved demo photo copies and decisions', async ({
     });
   });
   expect(savedRecords).toBe(0);
+});
+
+test('@claim:browser-data-clear clears saved photos and decisions with browser site data', async ({ page, baseURL }) => {
+  await openDemo(page);
+  const session = await page.context().newCDPSession(page);
+  await session.send('Storage.clearDataForOrigin', {
+    origin: new URL(baseURL!).origin,
+    storageTypes: 'all',
+  });
+  const afterClear = await page.evaluate(async () => {
+    const database = await new Promise<IDBDatabase>((resolve, reject) => {
+      const request = indexedDB.open('demo:large-type-catalog');
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+    return { photoStoreExists: database.objectStoreNames.contains('photos'), demoKeys: Object.keys(localStorage).filter((key) => key.startsWith('demo:')) };
+  });
+  expect(afterClear).toEqual({ photoStoreExists: false, demoKeys: [] });
 });
 
 test('@claim:free-use completes the catalog workflow without a payment gate', async ({ page }) => {

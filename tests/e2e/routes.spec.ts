@@ -61,3 +61,12 @@ test('shared header navigation and the 404 skip link work on every route', async
   await page.keyboard.press('Enter');
   await expect(page.locator('#main')).toBeFocused();
 });
+
+test('privacy gives the current path for clearing saved catalog data', async ({ page }) => {
+  await page.goto('/privacy/');
+  await expect(page.getByText('In the catalog, choose “Adjust display,” then “Clear saved catalog.”')).toBeVisible();
+  await page.goto('/demo');
+  await expect(page.getByRole('button', { name: 'Adjust display' })).toBeVisible();
+  await page.getByRole('button', { name: 'Adjust display' }).click();
+  await expect(page.getByRole('button', { name: 'Clear saved catalog' })).toBeVisible();
+});

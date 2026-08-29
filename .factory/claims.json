@@ -71,10 +71,17 @@
   },
   {
     "id": "filter-undo",
-    "claim": "Decision filters work and the last classification can be undone.",
+    "claim": "Decision filters, nearby photo navigation, and Undo work.",
     "where": "workspace, README",
     "test": "npm run test:e2e -- --grep @claim:filter-undo",
-    "sandbox": "fresh /demo context; classify, filter to that status, undo, and assert the item returns to its prior status"
+    "sandbox": "fresh /demo context; select a nearby photo, classify, filter to that status, undo, and assert the item returns to its prior status"
+  },
+  {
+    "id": "folder-open",
+    "claim": "Photos open only after you choose a folder.",
+    "where": "first screen, How it works, README",
+    "test": "npm run test:e2e -- --grep @claim:folder-open",
+    "sandbox": "fresh /demo context; activate Choose folder, provide a fixture folder, and assert both supported photos appear"
   },
   {
     "id": "private-runtime",
@@ -89,6 +96,13 @@
     "where": "privacy page, display dialog",
     "test": "npm run test:e2e -- --grep @claim:clear-data",
     "sandbox": "fresh /demo context; clear the populated catalog and inspect the demo IndexedDB photo store and catalog UI"
+  },
+  {
+    "id": "browser-data-clear",
+    "claim": "Clearing this browser's site data removes saved catalog photos and decisions.",
+    "where": "privacy page, README",
+    "test": "npm run test:e2e -- --grep @claim:browser-data-clear",
+    "sandbox": "fresh /demo context; clear all browser site data for the origin, then inspect the empty demo photo store and cleared demo preferences"
   },
   {
     "id": "free-use",

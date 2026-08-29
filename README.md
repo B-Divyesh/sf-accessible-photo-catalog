@@ -9,7 +9,7 @@ Demo: <https://accessible-photo-catalog.sociobot.in/demo>
 
 ## What it does
 
-- Open one photo folder from this device.
+- Open one photo folder after you choose it.
 - Save photos and decisions in this browser. Your work remains after a refresh
   and can work offline.
 - Use large buttons or keyboard shortcuts. Press `K` to keep, `R` to review,
@@ -26,9 +26,9 @@ Select **Try it with sample data** to open three prepared family photos. Demo
 changes stay in separate browser storage. They never change your real catalog.
 **Reset demo** restores the samples. **Start for real** discards demo data.
 
-Photos remain in the current browser profile. See
-[Privacy](https://accessible-photo-catalog.sociobot.in/privacy/) for the full
-data explanation.
+Photos and catalog data stay in this browser. Clearing this browser's site data
+removes them. See [Privacy](https://accessible-photo-catalog.sociobot.in/privacy/)
+for the full data explanation.
 
 ## Develop and verify
 

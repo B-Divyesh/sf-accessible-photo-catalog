@@ -33,7 +33,7 @@ function clearDemoPreferences(): void {
 app.innerHTML = `
   <a class="skip-link" href="#main">Skip to catalog</a>
   <div class="offline-banner" id="offline-banner" role="status" hidden>
-    <span aria-hidden="true">◇</span> Offline. Your saved catalog still works on this device.
+    <span aria-hidden="true">◇</span> Offline. Your saved catalog still works in this browser.
   </div>
   <aside class="demo-banner" id="demo-banner" aria-label="Demo controls" ${isDemo ? '' : 'hidden'}>
     <strong>Demo — sample data, nothing is saved</strong>
@@ -75,10 +75,10 @@ app.innerHTML = `
           <a class="button primary jumbo" id="demo-button" href="/demo">Try it with sample data</a>
           <button class="button jumbo" id="empty-choose-button" type="button">Choose your photo folder</button>
         </div>
-        <p class="action-note">The sample opens at once. Your folder opens only after you choose it.</p>
+        <p class="action-note">It opens three sample photos. Your folder opens only after you choose it.</p>
         <ul class="trust-list" aria-label="Privacy and compatibility">
-          <li><span aria-hidden="true">◆</span> Stays on this device</li>
-          <li><span aria-hidden="true">⌨</span> Full keyboard route</li>
+          <li><span aria-hidden="true">◆</span> Photos and catalog data stay in this browser</li>
+          <li><span aria-hidden="true">⌨</span> Works with a keyboard</li>
           <li><span aria-hidden="true">◐</span> Works offline</li>
         </ul>
       </div>
@@ -107,7 +107,7 @@ app.innerHTML = `
 
       <div class="filter-empty" id="filter-empty" hidden>
         <span class="filter-empty-symbol" aria-hidden="true">◇</span>
-        <h3>No photos at this stop</h3>
+        <h3>No photos match this filter</h3>
         <p>Choose another decision filter to continue.</p>
         <button class="button" id="show-all-button" type="button">Show all photos</button>
       </div>
@@ -136,12 +136,12 @@ app.innerHTML = `
               <button class="decision review" data-status="review" type="button"><kbd>R</kbd><span><strong>Review</strong><small>Decide later</small></span></button>
               <button class="decision reject" data-status="reject" type="button"><kbd>X</kbd><span><strong>Reject</strong><small>Mark in export only</small></span></button>
             </div>
-            <p class="decision-note">Nothing is deleted or renamed. Decisions are written only to your export.</p>
+            <p class="decision-note">Original photos are not deleted or renamed. Your decisions are saved in this browser and included in exports.</p>
           </section>
 
           <aside class="details" aria-labelledby="details-title">
             <div class="details-heading">
-              <div><p class="eyebrow">Sidecar details</p><h3 id="details-title">Label this photo</h3></div>
+              <div><p class="eyebrow">Photo details</p><h3 id="details-title">Label this photo</h3></div>
               <span class="status-ticket" id="status-ticket">Unreviewed</span>
             </div>
 
@@ -177,7 +177,7 @@ app.innerHTML = `
         <p class="route-label">How it works</p>
         <h2 id="how-it-works-title">Sort a folder in three steps</h2>
         <ol class="steps-list">
-          <li><strong>Choose a folder.</strong><span>Open photos from this device.</span></li>
+          <li><strong>Choose a folder.</strong><span>Open photos after you choose a folder.</span></li>
           <li><strong>Mark each photo.</strong><span>Keep, review, or reject it.</span></li>
           <li><strong>Export decisions.</strong><span>Save a CSV file when you finish.</span></li>
         </ol>
@@ -206,8 +206,8 @@ app.innerHTML = `
         <label><input type="radio" name="text-size" value="larger" /> Larger</label>
         <label><input type="radio" name="text-size" value="largest" /> Largest</label>
       </fieldset>
-      <label class="switch-row"><span><strong>High contrast</strong><small>Use the night platform palette</small></span><input id="contrast-toggle" type="checkbox" /></label>
-      <button class="button" id="install-button" type="button" hidden>Install app on this device</button>
+      <label class="switch-row"><span><strong>High contrast</strong><small>Use light text on a near-black background.</small></span><input id="contrast-toggle" type="checkbox" /></label>
+      <button class="button" id="install-button" type="button" hidden>Install the catalog</button>
       <hr />
       <button class="button" id="json-export-button" type="button" disabled>Export backup (JSON)</button>
       <button class="button" id="json-import-button" type="button">Import backup</button>
@@ -219,7 +219,7 @@ app.innerHTML = `
 
   <dialog id="help-dialog" aria-labelledby="help-title">
     <form method="dialog" class="dialog-shell help-shell">
-      <div class="dialog-heading"><div><p class="eyebrow">Keyboard route</p><h2 id="help-title">Sort without a mouse</h2></div><button class="icon-button" value="close" aria-label="Close keyboard help">×</button></div>
+      <div class="dialog-heading"><div><p class="eyebrow">Keyboard shortcuts</p><h2 id="help-title">Sort without a mouse</h2></div><button class="icon-button" value="close" aria-label="Close keyboard help">×</button></div>
       <dl class="shortcut-list">
         <div><dt><kbd>←</kbd> <kbd>→</kbd></dt><dd>Previous or next photo</dd></div>
         <div><dt><kbd>K</kbd></dt><dd>Keep and advance</dd></div>
@@ -230,7 +230,7 @@ app.innerHTML = `
         <div><dt><kbd>?</kbd></dt><dd>Open this guide</dd></div>
       </dl>
       <p>In a text field, press <kbd>Enter</kbd> to save. Press <kbd>Escape</kbd> to close a dialog.</p>
-      <button class="button primary full" value="close">Start sorting</button>
+      <button class="button primary full" value="close">Close keyboard shortcuts</button>
     </form>
   </dialog>
 
@@ -354,6 +354,10 @@ function escapeHtml(value: string): string {
   return span.innerHTML;
 }
 
+function comparePhotos(a: CatalogPhoto, b: CatalogPhoto): number {
+  return a.relativePath.localeCompare(b.relativePath, undefined, { numeric: true });
+}
+
 function render(): void {
   const hasPhotos = photos.length > 0;
   document.body.classList.toggle('empty-catalog', !hasPhotos);
@@ -435,7 +439,7 @@ async function makeDemoPhotos(): Promise<CatalogPhoto[]> {
     photo.updatedAt = Date.UTC(2026, 6, 20 + index);
     return photo;
   }));
-  return samplePhotos;
+  return samplePhotos.sort(comparePhotos);
 }
 
 async function resetDemo(): Promise<void> {
@@ -475,7 +479,7 @@ async function importFiles(files: File[]): Promise<void> {
   try {
     const previous = new Map(photos.map((photo) => [photo.id, photo]));
     const nextPhotos = imageFiles.map((file) => createPhoto(file, previous.get(`${file.webkitRelativePath || file.name}\u001f${file.size}\u001f${file.lastModified}`)));
-    nextPhotos.sort((a, b) => a.relativePath.localeCompare(b.relativePath, undefined, { numeric: true }));
+    nextPhotos.sort(comparePhotos);
     await replacePhotos(nextPhotos);
     photos = nextPhotos;
     currentId = photos[0].id;
@@ -485,7 +489,7 @@ async function importFiles(files: File[]): Promise<void> {
     localStorage.setItem(localKey('catalog-folder'), folderName);
     render();
     announce(`${photos.length} photos ready. Photo 1, ${photos[0].originalName}.`);
-    showToast(`${photos.length} photos are ready. They stay on this device.`);
+    showToast(`${photos.length} photos are ready in this browser.`);
   } catch (error) {
     console.error(error);
     showToast('The folder could not be saved. This device may be low on browser storage. Try a smaller folder.');
@@ -660,7 +664,7 @@ byId<HTMLInputElement>('json-input').addEventListener('change', async (event) =>
     if (parsed.version !== 1 || !Array.isArray(parsed.photos)) {
       throw new Error('That backup format is not supported. Choose a Large Type Catalog backup and try again.');
     }
-    if (!photos.length) throw new Error('Open the original photo folder before importing its metadata backup.');
+    if (!photos.length) throw new Error('Open the original photo folder before importing this backup.');
     const metadata = new Map(parsed.photos.map((photo) => [photo.relativePath, photo]));
     let matched = 0;
     photos.forEach((photo) => {
@@ -745,7 +749,7 @@ document.addEventListener('keydown', (event) => {
   else if (event.key === '?') { event.preventDefault(); helpDialog.showModal(); }
 });
 
-window.addEventListener('online', () => { byId('offline-banner').hidden = true; showToast('Back online. Your catalog remained on this device.'); });
+window.addEventListener('online', () => { byId('offline-banner').hidden = true; showToast('Back online. Your catalog remained in this browser.'); });
 window.addEventListener('offline', () => { byId('offline-banner').hidden = false; });
 window.addEventListener('beforeinstallprompt', (event) => {
   event.preventDefault();
