@@ -38,4 +38,7 @@ The second review's unresolved findings are repaired in this round.
 
 The independent local run completed all 16 claim commands, 30 Chromium browser
 tests, unit/release tests, typecheck, lint, and production build. Deployment
-and cold live checks are recorded in `handoff.md` after the work-order deploy.
+`e54a36f0-f625-4c99-aa49-12f51edb98a3` passed a cold live 30-test run at
+<https://accessible-photo-catalog.sociobot.in/>. `verify-url.sh` evidence is
+[`live-root/verify.json`](evidence/polish-2/live-root/verify.json) and
+[`live-demo/verify.json`](evidence/polish-2/live-demo/verify.json).

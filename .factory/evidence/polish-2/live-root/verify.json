@@ -1,0 +1,14 @@
+{
+  "url": "https://accessible-photo-catalog.sociobot.in/",
+  "loadMs": 560,
+  "errors": [],
+  "a11y": {
+    "title": "Large Type Catalog — Sort local photos clearly",
+    "lang": "en",
+    "h1": 1,
+    "main": true,
+    "imgsMissingAlt": 0,
+    "buttonsUnlabeled": 0,
+    "textLength": 879
+  }
+}
