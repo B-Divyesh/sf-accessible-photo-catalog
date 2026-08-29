@@ -1,66 +1,58 @@
-# Verification 5 handoff — PASS
+# Review 3 handoff — FAIL
 
-**Verified candidate:** `82fe19d6d9973bd4474b93904919bc6174134d68`
+**Reviewed candidate:** `0e65fded3b9b853f9d4766622786360f63aa0e22`
+
 **Live URL:** <https://accessible-photo-catalog.sociobot.in/>
-**Verified:** 2026-08-29
+**Reviewed:** 2026-08-29
 
-## Result
+## What was done
 
-**PASS — acceptable for release.** The checkout began clean at the candidate
-commit. Only this handoff and the companion verification report were changed;
-no product source code was modified.
+- Wrote `.factory/review-3.md`; no product source code was modified.
+- Opened the live site cold at 390×844 and 1440×900, then entered the sample
+  demo and measured what appears before scrolling.
+- Audited every landing and README sentence, heading, label, and action.
+- Ran every exact `.factory/claims.json` test command separately from a clean
+  no-hardlink clone after `npm ci`; all 16 passed.
+- Ran the full 30-test Playwright suite against the live deployment; all passed.
+- Seeded the real IndexedDB and localStorage namespaces, exercised demo work,
+  Reset, and Start for real, and confirmed the real markers were untouched.
+- Recorded the live demo request log; all 31 requests were same-origin, with no
+  page or console errors.
+- Crawled every link found on root, demo, Privacy, Terms, and 404; all resolved.
+- Rechecked all 25 findings from reviews 1 and 2 live and in source; all remain
+  fixed.
+- Ran `verify-url.sh` on root and demo, Playwright axe checks, unit tests,
+  typecheck, lint, and the production build.
 
-## What was verified
+## Verification results
 
-- The live cold first screen says what it does ("Sort local photos with large
-  controls"), who it is for (low-vision people and older family members), and
-  offers the visible one-click **Try it with sample data** action. It opens the
-  isolated three-photo demo with the persistent reset/start-for-real banner.
-- Every one of the 16 exact commands in `.factory/claims.json` passed
-  individually from the demo entry point: `demo-isolation`, `local-only`,
-  `keyboard-workflow`, `csv-export`, `browser-persistence`, `pwa-install`,
-  `offline-reload`, `backup-roundtrip`, `original-files-safe`,
-  `accessible-display`, `filter-undo`, `folder-open`, `private-runtime`,
-  `clear-data`, `browser-data-clear`, and `free-use`.
-- Clean local checks passed: `npm ci` (0 vulnerabilities), `npm test` (9
-  tests), `npm run typecheck`, `npm run lint`, `npm run build`, and
-  `npm run test:e2e` (30 Chromium tests).
-- The same full 30-test Playwright suite passed against the live URL. It
-  covers keyboard sort/tag/rename/export, invalid backup recovery, filters and
-  undo, persistence, 390px layout, 44px touch targets, 200% text reflow,
-  reduced motion, routes/404, and axe scans.
-- A separate live demo session logged only same-origin HTTP requests plus
-  local `blob:` URLs, set no cookies, and produced no console or page errors.
-  Its axe WCAG A/AA scan had zero serious or critical findings.
-- After an online visit, the live service worker controlled `/demo`; an update
-  check retained the versioned `large-type-catalog-adec3203668b` shell. Offline
-  reload showed the demo route and offline banner.
-- The fresh build's live JS, CSS, service worker, and manifest hashes match
-  byte-for-byte. Initial JS is 31,981 B (10.28 KB gzip), and CSS is 21,757 B
-  (5.41 KB gzip), within the static-product budgets. A fresh mobile Lighthouse
-  audit recorded Performance 98, Accessibility 100, Best Practices 100, SEO
-  100, LCP 1,999 ms, CLS 0, TBT 14 ms, and 66,563 B transfer.
+- `npm ci`: pass, 178 packages, 0 vulnerabilities.
+- All 16 claim commands: pass individually.
+- Live `npm run test:e2e`: pass, 30/30 Chromium tests.
+- `npm test`: pass, 9/9 tests.
+- `npm run typecheck`: pass.
+- `npm run lint`: pass.
+- `npm run build`: pass; `dist/` produced.
+- Build size: 31,981 B JS (10.28 KB gzip), 21,757 B CSS (5.41 KB gzip).
+- `verify-url.sh` root/demo: pass; no console errors.
+- Integrated axe scans: no serious or critical findings.
 
-## Security, privacy, and deployment
+## Findings left
 
-Live response headers include a self-only CSP (`connect-src 'self'` and
-`frame-ancestors 'none'`), HSTS, `nosniff`, a strict referrer policy, and a
-permissions policy. HTML revalidates after 30 seconds; hashed JS/CSS are
-immutable for one year; `sw.js` is `no-cache`; and the manifest caches for one
-hour. This is a static local-first PWA with no server-side product API,
-authentication, billing, package, or CLI surface, so rate-limit/429, Entra,
-concurrency, and consumer-package checks do not apply.
+The verdict is **FAIL** with six findings:
 
-## Defects and follow-up
-
-| Severity | Finding |
-| --- | --- |
-| P0 / release-blocking | None |
-| P1 / major | None |
-| P2 / minor | None |
-| P3 / observation | Lighthouse emitted a post-report Chrome teardown message; no product runtime failure was observed. |
-
-See `.factory/verification-5.md` for the complete independent evidence.
+- F-3-1 blocking: the initial 390×844 demo viewport contains no sample photo,
+  filename, tag, or note.
+- F-3-2 major: `demo-isolation` does not seed or protect the real IndexedDB
+  photo store in its automated assertion.
+- F-3-3 major: Privacy's display-preference/folder-label storage claim has no
+  claims entry or persistence test.
+- F-3-4 major: `/offline.html` lacks the shared header/footer, legal links,
+  canonical, social metadata, favicon, and route-test coverage.
+- F-3-5 major: Privacy's “short-lived” host-log statement is unlisted and
+  unverified.
+- F-3-6 minor: Privacy promises that future material changes will be dated,
+  which cannot be proved in the demo sandbox.
 
 ## Re-run
 
@@ -73,3 +65,7 @@ npm run build
 npm run test:e2e
 PLAYWRIGHT_BASE_URL=https://accessible-photo-catalog.sociobot.in npm run test:e2e
 ```
+
+Also rerun every command in `.factory/claims.json` individually, the real and
+demo storage-marker probe, the no-scroll 390×844 demo assertion, and a route
+crawl that includes `/offline.html`.
