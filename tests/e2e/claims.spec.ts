@@ -10,6 +10,8 @@ async function openDemo(page: Page): Promise<void> {
   await page.goto('/demo');
   await expect(page).toHaveTitle('Demo — Large Type Catalog');
   await expect(page.getByText('Demo — sample data, nothing is saved', { exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Sample photo catalog' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Sample photo catalog' })).toBeFocused();
   await expect(page.getByRole('heading', { name: 'Photo 1 of 3' })).toBeVisible();
 }
 
@@ -20,9 +22,9 @@ test('@claim:demo-isolation keeps sample work separate and resets it', async ({ 
   await expect(page).toHaveURL(/\/demo$/);
   await expect(page.getByText('Demo — sample data, nothing is saved', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: /Reject/ }).click();
-  await page.getByRole('button', { name: 'Display' }).click();
+  await page.getByRole('button', { name: 'Adjust display' }).click();
   await page.getByRole('radio', { name: 'Largest' }).check();
-  await page.getByRole('button', { name: 'Done' }).click();
+  await page.getByRole('button', { name: 'Close display settings' }).click();
   await page.getByRole('button', { name: 'Reset demo' }).click();
   await expect(page.locator('#status-ticket')).toHaveText('Keep');
   expect(await page.evaluate(() => getComputedStyle(document.documentElement).fontSize)).toBe('18px');
@@ -125,7 +127,7 @@ test('@claim:offline-reload restores the populated demo without a network', asyn
 test('@claim:backup-roundtrip exports photo-free JSON and restores its metadata', async ({ page }) => {
   await openDemo(page);
   await page.getByRole('button', { name: /Reject/ }).click();
-  await page.getByRole('button', { name: 'Display' }).click();
+  await page.getByRole('button', { name: 'Adjust display' }).click();
   const downloadPromise = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Export backup (JSON)' }).click();
   const backup = await downloadPromise;
@@ -133,11 +135,11 @@ test('@claim:backup-roundtrip exports photo-free JSON and restores its metadata'
   const parsed = JSON.parse(await readFile(backupPath, 'utf8'));
   expect(parsed.photos).toHaveLength(3);
   expect(parsed.photos[0]).not.toHaveProperty('blob');
-  await page.getByRole('button', { name: 'Done' }).click();
+  await page.getByRole('button', { name: 'Close display settings' }).click();
   await page.getByRole('button', { name: 'Reset demo' }).click();
-  await page.getByRole('button', { name: 'Display' }).click();
+  await page.getByRole('button', { name: 'Adjust display' }).click();
   await page.locator('#json-input').setInputFiles(backupPath);
-  await page.getByRole('button', { name: 'Done' }).click();
+  await page.getByRole('button', { name: 'Close display settings' }).click();
   await expect(page.locator('#status-ticket')).toHaveText('Reject');
 });
 
@@ -163,10 +165,10 @@ test('@claim:accessible-display supports contrast, text size, reduced motion, an
   await page.keyboard.press('Tab');
   const focusOutline = await page.evaluate(() => getComputedStyle(document.activeElement!).outlineWidth);
   expect(parseFloat(focusOutline)).toBeGreaterThanOrEqual(3);
-  await page.getByRole('button', { name: 'Display' }).click();
+  await page.getByRole('button', { name: 'Adjust display' }).click();
   await page.getByRole('radio', { name: 'Largest' }).check();
   await page.getByRole('checkbox', { name: /High contrast/ }).check();
-  await page.getByRole('button', { name: 'Done' }).click();
+  await page.getByRole('button', { name: 'Close display settings' }).click();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   expect(await page.evaluate(() => getComputedStyle(document.documentElement).fontSize)).toBe('26px');
   expect(await page.evaluate(() => document.documentElement.dataset.contrast)).toBe('true');

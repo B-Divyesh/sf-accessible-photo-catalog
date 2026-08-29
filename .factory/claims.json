@@ -58,7 +58,7 @@
   {
     "id": "original-files-safe",
     "claim": "Sorting and queued filenames do not change original photo files.",
-    "where": "workspace, terms page, README",
+    "where": "landing privacy section, workspace, terms page, README",
     "test": "npm run test:e2e -- --grep @claim:original-files-safe",
     "sandbox": "fresh /demo context; import fixture folder, classify and queue a name, then compare fixture SHA-256"
   },

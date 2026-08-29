@@ -56,9 +56,9 @@ test('completes a keyboard-only classify, tag, rename, and CSV export route', as
   const workspaceA11y = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']).analyze();
   expect(workspaceA11y.violations.filter((violation) => ['serious', 'critical'].includes(violation.impact ?? ''))).toEqual([]);
 
-  await page.getByRole('button', { name: 'Display' }).click();
+  await page.getByRole('button', { name: 'Adjust display' }).click();
   await page.getByRole('checkbox', { name: /High contrast/ }).check();
-  await page.getByRole('button', { name: 'Done' }).click();
+  await page.getByRole('button', { name: 'Close display settings' }).click();
   const contrastA11y = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']).analyze();
   expect(contrastA11y.violations.filter((violation) => ['serious', 'critical'].includes(violation.impact ?? ''))).toEqual([]);
   expect(consoleErrors).toEqual([]);

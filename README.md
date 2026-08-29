@@ -1,34 +1,32 @@
 # Large Type Catalog
 
-Large Type Catalog is a free, local-first photo triage workspace for low-vision
-knowledge workers, older family members, and anyone who finds conventional photo
-managers too dense. It shows one large photo at a time and supports a complete
-keyboard route for Keep, Review, Reject, tags, notes, and a queued filename.
-It never uploads, deletes, moves, or renames the original photos.
+Large Type Catalog sorts photos for people who need large controls. It is for
+low-vision people, older family members, and anyone who finds photo managers
+hard to read. It never uploads, deletes, moves, or renames original photos.
 
 Production: <https://accessible-photo-catalog.sociobot.in>
 Demo: <https://accessible-photo-catalog.sociobot.in/demo>
 
 ## What it does
 
-- Opens one local photo folder with the browser's directory picker.
-- Stores local copies and catalog decisions in IndexedDB so work survives a
-  refresh and remains available offline.
-- Sorts with large semantic controls or keyboard shortcuts: `K` Keep, `R`
-  Review, `X` Reject, arrows to navigate, `T` for tags, and `N` for filename.
-- Filters by decision, shows nearby photos, and provides an immediate Undo.
-- Exports a spreadsheet-friendly CSV sidecar and a JSON metadata backup.
-- Offers three text scales, a high-contrast theme, visible focus, live screen
-  reader feedback, reduced-motion support, and a 390px mobile layout.
-- Installs as a PWA after the first online visit and reloads offline.
+- Open one photo folder from this device.
+- Save photos and decisions in this browser. Your work remains after a refresh
+  and can work offline.
+- Use large buttons or keyboard shortcuts. Press `K` to keep, `R` to review,
+  and `X` to reject. Use arrows to move, `T` for tags, and `N` for the export
+  filename.
+- Filter by decision, view nearby photos, and undo the last decision.
+- Export a CSV file with one row for each photo.
+- Export a backup file with decisions, tags, notes, and filenames. It does not
+  include photos. Open the same folder before restoring a backup.
+- Choose three text sizes, high contrast, reduced motion, and keyboard controls.
+- After one online visit, install it like an app. It can then reopen offline.
 
 Select **Try it with sample data** to open three prepared family photos. Demo
-changes use the separate `demo:` browser-storage namespace. **Reset demo**
-restores the samples. **Start for real** discards demo data without reading or
-changing the real catalog.
+changes stay in separate browser storage. They never change your real catalog.
+**Reset demo** restores the samples. **Start for real** discards demo data.
 
-Photos remain in the current browser profile. A JSON backup contains metadata,
-not image bytes; reopen the matching folder before importing it. See
+Photos remain in the current browser profile. See
 [Privacy](https://accessible-photo-catalog.sociobot.in/privacy/) for the full
 data explanation.
 
@@ -37,39 +35,40 @@ data explanation.
 Requires Node.js 20.19 or newer.
 
 ```sh
-npm install
+npm ci
 npm run typecheck
-npm run dev
+npm run lint
 npm test
 npm run build
 npm run test:e2e
 ```
 
-The exact production build command is `npm run build`. It writes the static
-site to `dist/`, with `dist/index.html` at the deploy root. Preview that output
-with `npm run preview`.
+`npm run build` writes the static site to `dist/`. Preview it with
+`npm run preview`. Playwright is pinned to 1.58.2.
 
-Playwright is pinned to 1.58.2. The E2E suite covers the full keyboard route,
-CSV contents, default and high-contrast axe scans, a 390px viewport, console
-errors, demo isolation, PWA installation criteria, and an offline reload. Every
-public product claim is listed in `.factory/claims.json` with one tagged browser
-test. Run one with `npm run test:e2e -- --grep @claim:offline-reload`.
+Browser tests cover keyboard sorting, CSV export, demo isolation, and offline
+reload. They also check the 390px layout, high contrast, accessibility, and
+console errors. Every public product claim appears in `.factory/claims.json`
+with one tagged browser test. Run one with:
+
+```sh
+npm run test:e2e -- --grep @claim:offline-reload
+```
 
 ## Browser notes
 
-Current Chromium, Firefox, and Safari are the target browsers. Directory picker
-presentation and support for formats such as HEIC depend on the browser. Browser
-storage quotas also vary; very large collections may need to be opened in
-smaller folders. Original files remain safe if the browser clears site data.
+This release is verified in Chromium. Folder selection and formats such as
+HEIC depend on the browser. Browser storage limits vary. Open very large
+collections in smaller folders. Original files remain safe if the browser
+clears site data.
 
 ## Project notes
 
 - `.factory/brief.json` records product scope.
-- `.factory/design.md` records the art-deco visual system and generated artwork
-  provenance.
+- `.factory/design.md` records the art-deco visual system and artwork provenance.
 - `.factory/demo.md` documents the sample sandbox and storage boundary.
 - `.factory/claims.json` maps each public promise to an observable test.
-- `.factory/handoff.md` records verification and known v1 gaps.
+- `.factory/handoff.md` records verification and known gaps.
 - `LICENSE` is MIT.
 
 No third-party fonts, analytics, runtime scripts, payment services, or cloud

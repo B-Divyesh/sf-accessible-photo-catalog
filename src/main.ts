@@ -44,18 +44,23 @@ app.innerHTML = `
       <svg class="mark" viewBox="0 0 64 64" aria-hidden="true"><path d="M4 46 32 6l28 40H4Z"/><circle cx="32" cy="34" r="10"/><path d="M10 52h44v7H10z"/></svg>
       <span><span class="eyebrow">Private photo sorter</span><span class="wordmark">Large Type Catalog</span></span>
     </a>
+    <nav class="site-nav" aria-label="Site navigation">
+      <a href="/demo" ${isDemo ? 'aria-current="page"' : ''}>Demo</a>
+      <a href="/privacy/">Privacy</a>
+      <a href="/terms/">Terms</a>
+    </nav>
     <div class="session-count" id="session-count" aria-live="polite">No folder open</div>
     <nav class="top-actions" aria-label="Catalog actions">
       <button class="button primary" id="choose-button" type="button"><span aria-hidden="true">＋</span> Choose folder</button>
       <button class="button" id="export-button" type="button" disabled><span aria-hidden="true">⇩</span> Export CSV</button>
-      <button class="button compact" id="settings-button" type="button" aria-haspopup="dialog">Display</button>
-      <button class="button compact" id="help-button" type="button" aria-haspopup="dialog">Keys</button>
+      <button class="button compact" id="settings-button" type="button" aria-haspopup="dialog">Adjust display</button>
+      <button class="button compact" id="help-button" type="button" aria-haspopup="dialog">View keyboard shortcuts</button>
     </nav>
     <input id="folder-input" type="file" accept="image/*,.heic,.heif" multiple webkitdirectory hidden />
   </header>
 
   <main id="main" tabindex="-1">
-    <section class="empty-state" id="empty-state" aria-labelledby="empty-title">
+    <section class="empty-state" id="empty-state" aria-labelledby="page-title">
       <picture class="poster-frame">
         <source type="image/avif" srcset="/assets/empty-observation.avif" />
         <source type="image/webp" srcset="/assets/empty-observation.webp" />
@@ -63,7 +68,7 @@ app.innerHTML = `
       </picture>
       <div class="empty-copy">
         <p class="route-label">Local photo sorting</p>
-        <h1 id="empty-title">Sort local photos with large controls</h1>
+        <h1 id="page-title" tabindex="-1">Sort local photos with large controls</h1>
         <p>For low-vision people and older family members who need a clear way to sort one photo folder.</p>
         <div class="hero-actions">
           <a class="button primary jumbo" id="demo-button" href="/demo">Try it with sample data</a>
@@ -78,11 +83,12 @@ app.innerHTML = `
       </div>
     </section>
 
-    <section class="workspace" id="workspace" aria-labelledby="workspace-title" hidden>
+    <section class="workspace" id="workspace" aria-labelledby="page-title" hidden>
       <div class="route-board">
         <div>
           <p class="eyebrow">Current photo</p>
-          <h2 id="workspace-title">Photo <span id="position">1 of 1</span></h2>
+          <div id="workspace-title-slot"></div>
+          <h2>Photo <span id="position">1 of 1</span></h2>
         </div>
         <label class="filter-label" for="filter-select">Show
           <select id="filter-select">
@@ -164,6 +170,24 @@ app.innerHTML = `
         </section>
       </div>
     </section>
+
+    <section class="landing-details" id="landing-details" aria-label="About the catalog">
+      <section aria-labelledby="how-it-works-title">
+        <p class="route-label">How it works</p>
+        <h2 id="how-it-works-title">Sort a folder in three steps</h2>
+        <ol class="steps-list">
+          <li><strong>Choose a folder.</strong><span>Open photos from this device.</span></li>
+          <li><strong>Mark each photo.</strong><span>Keep, review, or reject it.</span></li>
+          <li><strong>Export decisions.</strong><span>Save a CSV file when you finish.</span></li>
+        </ol>
+      </section>
+      <section class="limits-panel" aria-labelledby="limits-title">
+        <p class="route-label">Privacy</p>
+        <h2 id="limits-title">What this catalog does not do</h2>
+        <p>It does not upload, delete, move, or rename your original photos.</p>
+        <a href="/privacy/">Read the privacy details</a>
+      </section>
+    </section>
   </main>
 
   <footer>
@@ -174,7 +198,7 @@ app.innerHTML = `
 
   <dialog id="settings-dialog" aria-labelledby="settings-title">
     <form method="dialog" class="dialog-shell">
-      <div class="dialog-heading"><div><p class="eyebrow">Display settings</p><h2 id="settings-title">Adjust the display</h2></div><button class="icon-button" value="close" aria-label="Close display settings">×</button></div>
+      <div class="dialog-heading"><div><p class="eyebrow">Display settings</p><h2 id="settings-title">Adjust the display</h2></div><button class="icon-button" value="close" aria-label="Close">×</button></div>
       <fieldset>
         <legend>Text size</legend>
         <label><input type="radio" name="text-size" value="standard" /> Large</label>
@@ -188,7 +212,7 @@ app.innerHTML = `
       <button class="button" id="json-import-button" type="button">Import backup</button>
       <input id="json-input" type="file" accept="application/json,.json" hidden />
       <button class="button danger-outline" id="clear-button" type="button" disabled>Clear saved catalog</button>
-      <button class="button primary full" value="close">Done</button>
+      <button class="button primary full" value="close">Close display settings</button>
     </form>
   </dialog>
 
@@ -238,6 +262,9 @@ function byId<T extends HTMLElement>(id: string): T {
 const folderInput = byId<HTMLInputElement>('folder-input');
 const emptyState = byId<HTMLElement>('empty-state');
 const workspace = byId<HTMLElement>('workspace');
+const landingDetails = byId<HTMLElement>('landing-details');
+const pageTitle = byId<HTMLHeadingElement>('page-title');
+const workspaceTitleSlot = byId<HTMLElement>('workspace-title-slot');
 const photoWorkspace = byId<HTMLElement>('photo-workspace');
 const filterEmpty = byId<HTMLElement>('filter-empty');
 const filterSelect = byId<HTMLSelectElement>('filter-select');
@@ -330,6 +357,14 @@ function render(): void {
   const hasPhotos = photos.length > 0;
   emptyState.hidden = hasPhotos;
   workspace.hidden = !hasPhotos;
+  landingDetails.hidden = hasPhotos;
+  if (hasPhotos) {
+    pageTitle.textContent = isDemo ? 'Sample photo catalog' : 'Photo catalog';
+    workspaceTitleSlot.append(pageTitle);
+  } else {
+    pageTitle.textContent = 'Sort local photos with large controls';
+    document.querySelector<HTMLElement>('.empty-copy')?.prepend(pageTitle);
+  }
   byId<HTMLButtonElement>('export-button').disabled = !hasPhotos;
   byId<HTMLButtonElement>('json-export-button').disabled = !hasPhotos;
   byId<HTMLButtonElement>('clear-button').disabled = !hasPhotos;
@@ -741,7 +776,22 @@ async function start(): Promise<void> {
     showToast('Saved catalog data could not be opened. You can still choose a folder.');
   }
   render();
+  const historyRestore = performance.getEntriesByType('navigation').some((entry) => (entry as PerformanceNavigationTiming).type === 'back_forward');
+  if ((isDemo && photos.length) || historyRestore) {
+    window.requestAnimationFrame(() => {
+      pageTitle.focus({ preventScroll: true });
+      announce('Sample photo catalog. Three sample photos are ready.');
+    });
+  }
   void registerServiceWorker();
 }
 
 void start();
+
+window.addEventListener('pageshow', (event) => {
+  if (!event.persisted) return;
+  window.requestAnimationFrame(() => {
+    pageTitle.focus({ preventScroll: true });
+    announce(`${pageTitle.textContent}.`);
+  });
+});

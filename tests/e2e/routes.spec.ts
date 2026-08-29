@@ -35,3 +35,29 @@ test('every internal footer link resolves in the production build', async ({ pag
     expect((await request.get(href)).ok()).toBe(true);
   }
 });
+
+test('demo exposes and focuses its route heading on direct, linked, and history navigation', async ({ page }) => {
+  await page.goto('/demo');
+  await expect(page.getByRole('heading', { name: 'Sample photo catalog' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Sample photo catalog' })).toBeFocused();
+
+  await page.goto('/');
+  await page.getByRole('link', { name: 'Try it with sample data' }).click();
+  await expect(page.getByRole('heading', { name: 'Sample photo catalog' })).toBeFocused();
+  await page.goBack();
+  await expect(page.getByRole('heading', { name: 'Sort local photos with large controls' })).toBeFocused();
+});
+
+test('shared header navigation and the 404 skip link work on every route', async ({ page }) => {
+  for (const path of ['/', '/demo', '/privacy/', '/terms/', '/404.html']) {
+    await page.goto(path);
+    const header = page.locator('header');
+    await expect(header.getByRole('link', { name: 'Demo' })).toBeVisible();
+    await expect(header.getByRole('link', { name: 'Privacy' })).toBeVisible();
+    await expect(header.getByRole('link', { name: 'Terms' })).toBeVisible();
+  }
+  await page.goto('/404.html');
+  await page.getByRole('link', { name: 'Skip to main content' }).focus();
+  await page.keyboard.press('Enter');
+  await expect(page.locator('#main')).toBeFocused();
+});
