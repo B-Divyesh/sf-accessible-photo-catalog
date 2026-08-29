@@ -75,5 +75,26 @@
     "where": "workspace, README",
     "test": "npm run test:e2e -- --grep @claim:filter-undo",
     "sandbox": "fresh /demo context; classify, filter to that status, undo, and assert the item returns to its prior status"
+  },
+  {
+    "id": "private-runtime",
+    "claim": "The app has no account, ads, analytics, cookies, tracking, third-party runtime files, payment service, or cloud photo API.",
+    "where": "privacy page, README",
+    "test": "npm run test:e2e -- --grep @claim:private-runtime",
+    "sandbox": "fresh /demo context; exercise the catalog; inspect cookies, account/payment controls, loaded resources, and all requests"
+  },
+  {
+    "id": "clear-data",
+    "claim": "Clear saved catalog removes the browser's saved photo copies and decisions.",
+    "where": "privacy page, display dialog",
+    "test": "npm run test:e2e -- --grep @claim:clear-data",
+    "sandbox": "fresh /demo context; clear the populated catalog and inspect the demo IndexedDB photo store and catalog UI"
+  },
+  {
+    "id": "free-use",
+    "claim": "The complete catalog can be used without payment.",
+    "where": "privacy page, terms page",
+    "test": "npm run test:e2e -- --grep @claim:free-use",
+    "sandbox": "fresh /demo context; complete the main sorting and export flow without a payment, purchase, subscription, or sign-in gate"
   }
 ]

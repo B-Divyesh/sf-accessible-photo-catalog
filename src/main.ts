@@ -13,6 +13,7 @@ const currentUrlState = new URL(window.location.href);
 const isDemo = currentUrlState.pathname.replace(/\/$/, '') === '/demo' || currentUrlState.searchParams.get('demo') === '1';
 const storagePrefix = isDemo ? 'demo:' : '';
 configureStorage(isDemo);
+document.body.classList.toggle('empty-catalog', !isDemo);
 if (isDemo) {
   document.title = 'Demo — Large Type Catalog';
   document.querySelector<HTMLLinkElement>('link[rel="canonical"]')?.setAttribute('href', 'https://accessible-photo-catalog.sociobot.in/demo');
@@ -193,7 +194,7 @@ app.innerHTML = `
   <footer>
     <p>Photos and catalog data stay in this browser.</p>
     <nav aria-label="Legal"><a href="/demo">Demo</a><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a></nav>
-    <p class="generated-note">Built by Param Factory · v1.1.0 · Original generated artwork</p>
+    <p class="generated-note">Built by Param Factory · v1.1.1 · Original generated artwork</p>
   </footer>
 
   <dialog id="settings-dialog" aria-labelledby="settings-title">
@@ -355,6 +356,7 @@ function escapeHtml(value: string): string {
 
 function render(): void {
   const hasPhotos = photos.length > 0;
+  document.body.classList.toggle('empty-catalog', !hasPhotos);
   emptyState.hidden = hasPhotos;
   workspace.hidden = !hasPhotos;
   landingDetails.hidden = hasPhotos;
@@ -363,7 +365,7 @@ function render(): void {
     workspaceTitleSlot.append(pageTitle);
   } else {
     pageTitle.textContent = 'Sort local photos with large controls';
-    document.querySelector<HTMLElement>('.empty-copy')?.prepend(pageTitle);
+    document.querySelector<HTMLElement>('.empty-copy .route-label')?.after(pageTitle);
   }
   byId<HTMLButtonElement>('export-button').disabled = !hasPhotos;
   byId<HTMLButtonElement>('json-export-button').disabled = !hasPhotos;
@@ -371,6 +373,7 @@ function render(): void {
   renderCounts();
   if (!hasPhotos) {
     revokeImageUrls();
+    document.body.classList.remove('app-loading');
     return;
   }
 
@@ -416,6 +419,7 @@ function render(): void {
   byId<HTMLButtonElement>('previous-button').disabled = index === 0;
   byId<HTMLButtonElement>('next-button').disabled = index === visible.length - 1;
   renderThumbnails(visible, index);
+  document.body.classList.remove('app-loading');
 }
 
 async function makeDemoPhotos(): Promise<CatalogPhoto[]> {
@@ -647,8 +651,15 @@ byId<HTMLInputElement>('json-input').addEventListener('change', async (event) =>
   const file = input.files?.[0];
   if (!file) return;
   try {
-    const parsed = JSON.parse(await file.text()) as CatalogExport;
-    if (parsed.version !== 1 || !Array.isArray(parsed.photos)) throw new Error('Unsupported backup format');
+    let parsed: CatalogExport;
+    try {
+      parsed = JSON.parse(await file.text()) as CatalogExport;
+    } catch {
+      throw new Error('That backup is not valid JSON. Choose a Large Type Catalog backup and try again.');
+    }
+    if (parsed.version !== 1 || !Array.isArray(parsed.photos)) {
+      throw new Error('That backup format is not supported. Choose a Large Type Catalog backup and try again.');
+    }
     if (!photos.length) throw new Error('Open the original photo folder before importing its metadata backup.');
     const metadata = new Map(parsed.photos.map((photo) => [photo.relativePath, photo]));
     let matched = 0;
@@ -708,6 +719,12 @@ undoButton.addEventListener('click', async () => {
 document.addEventListener('keydown', (event) => {
   const target = event.target as HTMLElement;
   const typing = target.matches('input, textarea, select, [contenteditable="true"]');
+  const targetDialog = target.closest<HTMLDialogElement>('dialog[open]');
+  if (event.key === 'Escape' && targetDialog) {
+    event.preventDefault();
+    targetDialog.close('cancel');
+    return;
+  }
   if (typing && event.key === 'Escape') {
     event.preventDefault();
     render();

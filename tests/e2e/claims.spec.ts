@@ -191,3 +191,52 @@ test('@claim:filter-undo filters decisions and reverses the last classification'
   await page.getByRole('button', { name: 'Show all photos' }).click();
   await expect(page.locator('#status-ticket')).toHaveText('Keep');
 });
+
+test('@claim:private-runtime uses no account, tracking, or third-party runtime service', async ({ page, context, baseURL }) => {
+  const requests: string[] = [];
+  page.on('request', (request) => requests.push(request.url()));
+  await openDemo(page);
+  await page.locator('.decision.keep').click();
+  await page.getByRole('button', { name: /Export CSV/ }).click();
+  await page.goto('/privacy/');
+  const origin = new URL(baseURL!).origin;
+  expect(requests.length).toBeGreaterThan(0);
+  expect(requests.every((url) => new URL(url).origin === origin)).toBe(true);
+  expect(await context.cookies()).toEqual([]);
+  await expect(page.locator('input[type="email"], input[type="password"], [href*="login"], [href*="checkout"], [href*="subscribe"]')).toHaveCount(0);
+  const runtimeResources = await page.evaluate(() => performance.getEntriesByType('resource').map((entry) => entry.name));
+  expect(runtimeResources.every((url) => new URL(url).origin === origin)).toBe(true);
+});
+
+test('@claim:clear-data removes saved demo photo copies and decisions', async ({ page }) => {
+  await openDemo(page);
+  await page.getByRole('button', { name: /Reject/ }).click();
+  await page.getByRole('button', { name: 'Adjust display' }).click();
+  await page.getByRole('button', { name: 'Clear saved catalog' }).click();
+  await page.getByRole('button', { name: 'Clear saved catalog', exact: true }).last().click();
+  await expect(page.getByRole('heading', { name: 'Sort local photos with large controls' })).toBeVisible();
+  await expect(page.locator('#toast-message')).toHaveText('Saved catalog cleared. Original files were not changed.');
+  const savedRecords = await page.evaluate(async () => {
+    const database = await new Promise<IDBDatabase>((resolve, reject) => {
+      const request = indexedDB.open('demo:large-type-catalog');
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+    return await new Promise<number>((resolve, reject) => {
+      const request = database.transaction('photos', 'readonly').objectStore('photos').count();
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+  });
+  expect(savedRecords).toBe(0);
+});
+
+test('@claim:free-use completes the catalog workflow without a payment gate', async ({ page }) => {
+  await openDemo(page);
+  await page.getByRole('button', { name: /Reject/ }).click();
+  const downloadPromise = page.waitForEvent('download');
+  await page.getByRole('button', { name: /Export CSV/ }).click();
+  await downloadPromise;
+  await expect(page.locator('[href*="checkout"], [href*="subscribe"], [data-payment], input[type="email"], input[type="password"]')).toHaveCount(0);
+  await expect(page.getByRole('heading', { name: 'Photo 2 of 3' })).toBeVisible();
+});

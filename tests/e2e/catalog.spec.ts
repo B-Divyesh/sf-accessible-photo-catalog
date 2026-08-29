@@ -74,6 +74,82 @@ test('fits a 390px viewport without horizontal overflow', async ({ page }) => {
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 });
 
+for (const viewport of [
+  { name: 'desktop', width: 1440, height: 900 },
+  { name: 'mobile', width: 390, height: 844 },
+]) {
+  test(`keeps the complete first-read content in the ${viewport.name} first viewport`, async ({ page }) => {
+    await page.setViewportSize({ width: viewport.width, height: viewport.height });
+    await page.goto('/');
+
+    const firstRead = [
+      page.getByRole('heading', { name: 'Sort local photos with large controls' }),
+      page.getByText('For low-vision people and older family members who need a clear way to sort one photo folder.'),
+      page.getByRole('link', { name: 'Try it with sample data' }),
+      page.getByText('The sample opens at once. Your folder opens only after you choose it.'),
+      page.getByText('Stays on this device'),
+      page.getByText('Full keyboard route'),
+      page.getByText('Works offline'),
+    ];
+    for (const item of firstRead) {
+      await expect(item).toBeVisible();
+      const box = await item.boundingBox();
+      expect(box, 'first-read item has a layout box').not.toBeNull();
+      expect(box!.y, 'first-read item starts inside the viewport').toBeGreaterThanOrEqual(0);
+      expect(box!.y + box!.height, 'first-read item ends inside the viewport').toBeLessThanOrEqual(viewport.height);
+    }
+    expect(await page.evaluate(() => scrollY)).toBe(0);
+  });
+}
+
+test('reflows the landing page and populated catalog at 200% text size', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.goto('/');
+  await page.evaluate(() => { document.documentElement.style.fontSize = '36px'; });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  expect(await page.locator('h1').evaluate((element) => element.scrollWidth <= element.clientWidth)).toBe(true);
+
+  await page.goto('/demo');
+  await page.evaluate(() => { document.documentElement.style.fontSize = '36px'; });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  for (const selector of ['#previous-button', '#next-button', '.field-key', '#nearby-title']) {
+    const item = page.locator(selector).first();
+    expect(await item.evaluate((element) => element.scrollWidth <= element.clientWidth && element.scrollHeight <= element.clientHeight), selector).toBe(true);
+  }
+});
+
+test('closes a dialog with Escape from form controls', async ({ page }) => {
+  await page.goto('/demo');
+  await page.getByRole('button', { name: 'Adjust display' }).click();
+  await page.getByRole('radio', { name: 'Largest' }).focus();
+  await page.keyboard.press('Escape');
+  await expect(page.locator('#settings-dialog')).not.toHaveAttribute('open', '');
+});
+
+test('gives every visible mobile control a 44 by 44 CSS pixel target', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/demo');
+  const undersized = await page.locator('a[href], button, input:not([type="hidden"]), select, textarea').evaluateAll((elements) => elements
+    .filter((element) => {
+      const style = getComputedStyle(element);
+      const rect = element.getBoundingClientRect();
+      return style.display !== 'none' && style.visibility !== 'hidden' && rect.width > 0 && rect.height > 0 && (rect.width < 44 || rect.height < 44);
+    })
+    .map((element) => {
+      const rect = element.getBoundingClientRect();
+      return `${element.tagName.toLowerCase()}#${element.id}.${element.className}: ${rect.width}x${rect.height}`;
+    }));
+  expect(undersized).toEqual([]);
+});
+
+test('explains how to recover from malformed backup JSON', async ({ page }) => {
+  await page.goto('/demo');
+  await page.getByRole('button', { name: 'Adjust display' }).click();
+  await page.locator('#json-input').setInputFiles({ name: 'broken.json', mimeType: 'application/json', buffer: Buffer.from('{') });
+  await expect(page.locator('#toast-message')).toHaveText('That backup is not valid JSON. Choose a Large Type Catalog backup and try again.');
+  await expect(page.locator('#toast-message')).not.toContainText('position');
+});
+
 test('reloads the app shell while offline after first visit', async ({ page, context }) => {
   await page.goto('/');
   await page.evaluate(() => navigator.serviceWorker.ready);
