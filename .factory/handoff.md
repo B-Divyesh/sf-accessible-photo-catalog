@@ -55,6 +55,10 @@ The live headers include the self-only CSP with `frame-ancestors 'none'`,
 Permissions-Policy, Referrer-Policy, and `nosniff`; unknown routes return the
 designed HTTP 404.
 
+Live Lighthouse 13.4.1 mobile audit: Performance 100, Accessibility 100, Best
+Practices 100, and SEO 100; FCP 0.9 s, LCP 1.4 s, CLS 0, TBT 0 ms, and 95 KiB
+transferred. The report is `.factory/evidence/polish-2/lighthouse-live.json`.
+
 ## Run and deploy
 
 ```sh

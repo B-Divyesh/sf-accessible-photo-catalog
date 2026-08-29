@@ -42,3 +42,5 @@ tests, unit/release tests, typecheck, lint, and production build. Deployment
 <https://accessible-photo-catalog.sociobot.in/>. `verify-url.sh` evidence is
 [`live-root/verify.json`](evidence/polish-2/live-root/verify.json) and
 [`live-demo/verify.json`](evidence/polish-2/live-demo/verify.json).
+Live Lighthouse scored 100 for Performance, Accessibility, Best Practices, and
+SEO; see [`lighthouse-live.json`](evidence/polish-2/lighthouse-live.json).
