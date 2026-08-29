@@ -12,7 +12,9 @@ test('completes a keyboard-only classify, tag, rename, and CSV export route', as
 
   await expect(page).toHaveTitle(/Large Type Catalog/);
   await expect(page.locator('h1')).toHaveCount(1);
-  await expect(page.getByRole('heading', { name: 'See one photo. Make one clear choice.' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Sort local photos with large controls' })).toBeVisible();
+  await expect(page.getByText(/For low-vision people and older family members/)).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Try it with sample data' })).toBeVisible();
 
   const emptyA11y = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']).analyze();
   expect(emptyA11y.violations.filter((violation) => ['serious', 'critical'].includes(violation.impact ?? ''))).toEqual([]);
@@ -65,7 +67,7 @@ test('completes a keyboard-only classify, tag, rename, and CSV export route', as
 test('fits a 390px viewport without horizontal overflow', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/');
-  await expect(page.getByRole('button', { name: /Choose a photo folder/ })).toBeVisible();
+  await expect(page.getByRole('button', { name: /Choose your photo folder/ })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   await page.locator('#folder-input').setInputFiles(photoFolder);
   await expect(page.getByRole('button', { name: /Keep/ })).toBeVisible();
@@ -80,7 +82,7 @@ test('reloads the app shell while offline after first visit', async ({ page, con
   await context.setOffline(true);
   await page.reload();
   await expect(page).toHaveTitle(/Large Type Catalog/);
-  await expect(page.getByRole('heading', { name: 'See one photo. Make one clear choice.' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Sort local photos with large controls' })).toBeVisible();
   await expect(page.locator('#offline-banner')).toBeVisible();
   await context.setOffline(false);
 });

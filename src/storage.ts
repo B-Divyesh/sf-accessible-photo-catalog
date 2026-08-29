@@ -1,12 +1,23 @@
 import type { CatalogPhoto } from './types';
 
-const DB_NAME = 'large-type-catalog';
+const REAL_DB_NAME = 'large-type-catalog';
+const DEMO_DB_NAME = 'demo:large-type-catalog';
 const STORE = 'photos';
 const DB_VERSION = 1;
 
+let demoMode = false;
+
+export function configureStorage(useDemoStorage: boolean): void {
+  demoMode = useDemoStorage;
+}
+
+export function storageDatabaseName(): string {
+  return demoMode ? DEMO_DB_NAME : REAL_DB_NAME;
+}
+
 function openDatabase(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, DB_VERSION);
+    const request = indexedDB.open(storageDatabaseName(), DB_VERSION);
     request.onupgradeneeded = () => {
       const database = request.result;
       if (!database.objectStoreNames.contains(STORE)) database.createObjectStore(STORE, { keyPath: 'id' });

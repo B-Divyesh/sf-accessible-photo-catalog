@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800" role="img" aria-label="A garden table with a birthday cake and colorful bunting">
+  <rect width="1200" height="800" fill="#f4e9d0"/>
+  <path d="M0 0h1200v430H0z" fill="#8eb9c1"/>
+  <path d="M0 600c215-88 410-64 606 16 190 78 395 80 594-8v192H0z" fill="#176b50"/>
+  <path d="m100 108 120 100 120-100 120 100 120-100 120 100 120-100 120 100 120-100" fill="none" stroke="#17242d" stroke-width="18"/>
+  <path d="m160 158 60 50 60-50zm240 0 60 50 60-50zm240 0 60 50 60-50zm240 0 60 50 60-50z" fill="#b73525"/>
+  <path d="M330 555h540v56H330zM390 610h38l-42 154h-38zm382 0h38l42 154h-38z" fill="#17242d"/>
+  <path d="M475 430h250v125H475z" fill="#fff9ea" stroke="#a46712" stroke-width="12"/>
+  <path d="M505 430v-55m63 55v-55m64 55v-55m63 55v-55" stroke="#b73525" stroke-width="13"/>
+  <circle cx="505" cy="361" r="13" fill="#ffd166"/><circle cx="568" cy="361" r="13" fill="#ffd166"/><circle cx="632" cy="361" r="13" fill="#ffd166"/><circle cx="695" cy="361" r="13" fill="#ffd166"/>
+</svg>

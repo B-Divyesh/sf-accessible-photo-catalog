@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800" role="img" aria-label="A red train passing a blue coast beneath pale cliffs">
+  <rect width="1200" height="800" fill="#fff9ea"/>
+  <path d="M0 420c180-90 270-80 410 0 130 74 250 75 390 0 170-92 273-87 400-12v392H0z" fill="#7aa5b8"/>
+  <path d="M0 245 250 95l225 223 164-128 225 230H0z" fill="#d6c7a8"/>
+  <path d="M0 584h1200v38H0z" fill="#17242d"/>
+  <path d="M194 430h710l132 116v54H194z" fill="#b73525"/>
+  <path d="M265 466h126v72H265zm161 0h126v72H426zm161 0h126v72H587zm161 0h126v72H748z" fill="#fff9ea"/>
+  <circle cx="348" cy="615" r="61" fill="#17242d"/><circle cx="855" cy="615" r="61" fill="#17242d"/>
+</svg>

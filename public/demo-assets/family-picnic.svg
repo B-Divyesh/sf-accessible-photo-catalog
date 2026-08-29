@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800" role="img" aria-label="A picnic table under a broad tree at sunset">
+  <rect width="1200" height="800" fill="#f4e9d0"/>
+  <circle cx="920" cy="170" r="100" fill="#ffd166"/>
+  <path d="M0 560c210-80 390-50 590 12 240 74 418 45 610-42v270H0z" fill="#176b50"/>
+  <path d="M270 520c32-140 83-238 171-318 75 104 92 213 82 318z" fill="#17242d"/>
+  <circle cx="397" cy="231" r="153" fill="#47785e"/>
+  <path d="M590 514h360l-46 62H636zM681 575h32l-44 156h-31zm168 0h32l45 156h-31z" fill="#a92e20"/>
+  <path d="M620 473h300v47H620z" fill="#17242d"/>
+</svg>

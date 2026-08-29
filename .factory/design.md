@@ -113,3 +113,10 @@ copyrighted characters, thin low-contrast details.
 derived prompt and tool parameters live beside the source image in
 `assets/src/empty-observation.json`. Generated specifically for this product;
 original asset, disclosed in the footer.
+
+The 1200×630 social card is a centered crop of that original generated image,
+created locally on 2026-08-29 with ImageMagick; it introduces no third-party
+material. The three demo photos are hand-authored geometric SVG scenes created
+for this repair: a family picnic, coastal train, and garden birthday. They use
+the same ink, cream, signal red, brass, and green palette and contain no brands,
+people, external resources, or embedded text.

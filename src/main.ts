@@ -1,6 +1,6 @@
 import './style.css';
 import { buildCsv, buildJson, createPhoto, formatBytes, isImageFile, parseTags, safeProposedName, statusCounts } from './catalog';
-import { clearPhotos, loadPhotos, replacePhotos, savePhoto } from './storage';
+import { clearPhotos, configureStorage, loadPhotos, replacePhotos, savePhoto } from './storage';
 import { STATUS_LABEL, type CatalogExport, type CatalogPhoto, type PhotoStatus } from './types';
 
 type Filter = 'all' | PhotoStatus;
@@ -9,15 +9,40 @@ type DeferredInstall = Event & { prompt: () => Promise<void>; userChoice: Promis
 const app = document.querySelector<HTMLDivElement>('#app');
 if (!app) throw new Error('Application root was not found.');
 
+const currentUrlState = new URL(window.location.href);
+const isDemo = currentUrlState.pathname.replace(/\/$/, '') === '/demo' || currentUrlState.searchParams.get('demo') === '1';
+const storagePrefix = isDemo ? 'demo:' : '';
+configureStorage(isDemo);
+if (isDemo) {
+  document.title = 'Demo — Large Type Catalog';
+  document.querySelector<HTMLLinkElement>('link[rel="canonical"]')?.setAttribute('href', 'https://accessible-photo-catalog.sociobot.in/demo');
+  document.querySelector<HTMLMetaElement>('meta[property="og:title"]')?.setAttribute('content', 'Demo — Large Type Catalog');
+  document.querySelector<HTMLMetaElement>('meta[property="og:url"]')?.setAttribute('content', 'https://accessible-photo-catalog.sociobot.in/demo');
+  document.querySelector<HTMLMetaElement>('meta[name="twitter:title"]')?.setAttribute('content', 'Demo — Large Type Catalog');
+}
+
+function localKey(key: string): string {
+  return `${storagePrefix}${key}`;
+}
+
+function clearDemoPreferences(): void {
+  Object.keys(localStorage).filter((key) => key.startsWith('demo:')).forEach((key) => localStorage.removeItem(key));
+}
+
 app.innerHTML = `
   <a class="skip-link" href="#main">Skip to catalog</a>
   <div class="offline-banner" id="offline-banner" role="status" hidden>
     <span aria-hidden="true">◇</span> Offline. Your saved catalog still works on this device.
   </div>
+  <aside class="demo-banner" id="demo-banner" aria-label="Demo controls" ${isDemo ? '' : 'hidden'}>
+    <strong>Demo — sample data, nothing is saved</strong>
+    <span>Changes stay in a separate demo catalog.</span>
+    <div><button id="reset-demo-button" type="button">Reset demo</button><button id="start-real-button" type="button">Start for real</button></div>
+  </aside>
   <header class="masthead">
     <a class="identity" href="/" aria-label="Large Type Catalog home">
       <svg class="mark" viewBox="0 0 64 64" aria-hidden="true"><path d="M4 46 32 6l28 40H4Z"/><circle cx="32" cy="34" r="10"/><path d="M10 52h44v7H10z"/></svg>
-      <span><span class="eyebrow">Private observation desk</span><span class="wordmark">Large Type Catalog</span></span>
+      <span><span class="eyebrow">Private photo sorter</span><span class="wordmark">Large Type Catalog</span></span>
     </a>
     <div class="session-count" id="session-count" aria-live="polite">No folder open</div>
     <nav class="top-actions" aria-label="Catalog actions">
@@ -30,8 +55,6 @@ app.innerHTML = `
   </header>
 
   <main id="main" tabindex="-1">
-    <h1 class="sr-only">Large Type Catalog photo sorting workspace</h1>
-
     <section class="empty-state" id="empty-state" aria-labelledby="empty-title">
       <picture class="poster-frame">
         <source type="image/avif" srcset="/assets/empty-observation.avif" />
@@ -39,10 +62,14 @@ app.innerHTML = `
         <img src="/assets/empty-observation.jpg" width="1152" height="768" fetchpriority="high" decoding="async" alt="Art-deco observation desk with blank photographs traveling along three sorting lanes" />
       </picture>
       <div class="empty-copy">
-        <p class="route-label">Next departure · your photo folder</p>
-        <h2 id="empty-title">See one photo.<br />Make one clear choice.</h2>
-        <p>Open a folder from this device, then sort with oversized controls or just the keyboard. Your photographs are never uploaded.</p>
-        <button class="button primary jumbo" id="empty-choose-button" type="button">Choose a photo folder <span aria-hidden="true">→</span></button>
+        <p class="route-label">Local photo sorting</p>
+        <h1 id="empty-title">Sort local photos with large controls</h1>
+        <p>For low-vision people and older family members who need a clear way to sort one photo folder.</p>
+        <div class="hero-actions">
+          <a class="button primary jumbo" id="demo-button" href="/demo">Try it with sample data</a>
+          <button class="button jumbo" id="empty-choose-button" type="button">Choose your photo folder</button>
+        </div>
+        <p class="action-note">The sample opens at once. Your folder opens only after you choose it.</p>
         <ul class="trust-list" aria-label="Privacy and compatibility">
           <li><span aria-hidden="true">◆</span> Stays on this device</li>
           <li><span aria-hidden="true">⌨</span> Full keyboard route</li>
@@ -54,7 +81,7 @@ app.innerHTML = `
     <section class="workspace" id="workspace" aria-labelledby="workspace-title" hidden>
       <div class="route-board">
         <div>
-          <p class="eyebrow">Current route</p>
+          <p class="eyebrow">Current photo</p>
           <h2 id="workspace-title">Photo <span id="position">1 of 1</span></h2>
         </div>
         <label class="filter-label" for="filter-select">Show
@@ -69,7 +96,7 @@ app.innerHTML = `
         <div class="count-track" id="count-track" aria-label="Decision totals"></div>
       </div>
 
-      <div class="progress-rail" aria-hidden="true"><span id="progress-marker"></span></div>
+      <progress class="progress-rail" id="progress-marker" max="100" value="0" aria-label="Catalog progress"></progress>
 
       <div class="filter-empty" id="filter-empty" hidden>
         <span class="filter-empty-symbol" aria-hidden="true">◇</span>
@@ -132,7 +159,7 @@ app.innerHTML = `
         </div>
 
         <section class="nearby" aria-labelledby="nearby-title">
-          <div><p class="eyebrow">Along the line</p><h3 id="nearby-title">Nearby photos</h3></div>
+          <div><p class="eyebrow">In this folder</p><h3 id="nearby-title">Nearby photos</h3></div>
           <div class="thumbnail-line" id="thumbnail-line"></div>
         </section>
       </div>
@@ -140,14 +167,14 @@ app.innerHTML = `
   </main>
 
   <footer>
-    <p>Private by design. Photos and catalog data stay in this browser.</p>
-    <nav aria-label="Legal"><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a></nav>
-    <p class="generated-note">Empty-state artwork was generated for this product.</p>
+    <p>Photos and catalog data stay in this browser.</p>
+    <nav aria-label="Legal"><a href="/demo">Demo</a><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a></nav>
+    <p class="generated-note">Built by Param Factory · v1.1.0 · Original generated artwork</p>
   </footer>
 
   <dialog id="settings-dialog" aria-labelledby="settings-title">
     <form method="dialog" class="dialog-shell">
-      <div class="dialog-heading"><div><p class="eyebrow">Observation settings</p><h2 id="settings-title">Make it yours</h2></div><button class="icon-button" value="close" aria-label="Close display settings">×</button></div>
+      <div class="dialog-heading"><div><p class="eyebrow">Display settings</p><h2 id="settings-title">Adjust the display</h2></div><button class="icon-button" value="close" aria-label="Close display settings">×</button></div>
       <fieldset>
         <legend>Text size</legend>
         <label><input type="radio" name="text-size" value="standard" /> Large</label>
@@ -184,7 +211,7 @@ app.innerHTML = `
 
   <dialog id="replace-dialog" aria-labelledby="replace-title">
     <form method="dialog" class="dialog-shell">
-      <div><p class="eyebrow">Change route</p><h2 id="replace-title">Replace this catalog?</h2></div>
+      <div><p class="eyebrow">Change folder</p><h2 id="replace-title">Replace this catalog?</h2></div>
       <p>Opening another folder removes the current photos and decisions from this browser. Export first if you need them.</p>
       <div class="dialog-actions"><button class="button" value="cancel">Cancel</button><button class="button danger" id="confirm-replace" value="replace">Replace catalog</button></div>
     </form>
@@ -228,13 +255,19 @@ const undoButton = byId<HTMLButtonElement>('undo-button');
 let photos: CatalogPhoto[] = [];
 let currentId = '';
 let filter: Filter = 'all';
-let folderName = localStorage.getItem('catalog-folder') || 'photo-folder';
+let folderName = localStorage.getItem(localKey('catalog-folder')) || 'photo-folder';
 let currentUrl = '';
 let thumbnailUrls: string[] = [];
 let pendingFiles: File[] = [];
 let toastTimer = 0;
 let deferredInstall: DeferredInstall | null = null;
 let undoState: { id: string; previous: PhotoStatus } | null = null;
+
+const demoSamples = [
+  { file: 'family-picnic.svg', status: 'keep' as const, tags: ['family', 'print'], note: 'Make a copy for Mum.' },
+  { file: 'coastal-train.svg', status: 'review' as const, tags: ['holiday', 'train'], note: 'Check the date with Sam.' },
+  { file: 'garden-birthday.svg', status: 'unreviewed' as const, tags: ['birthday'], note: '' },
+];
 
 function visiblePhotos(): CatalogPhoto[] {
   return filter === 'all' ? photos : photos.filter((photo) => photo.status === filter);
@@ -311,7 +344,7 @@ function render(): void {
     filterEmpty.hidden = false;
     photoWorkspace.hidden = true;
     byId('position').textContent = `0 of ${photos.length}`;
-    byId('progress-marker').style.width = '0%';
+    byId<HTMLProgressElement>('progress-marker').value = 0;
     return;
   }
   filterEmpty.hidden = true;
@@ -330,7 +363,7 @@ function render(): void {
   image.src = currentUrl;
   image.alt = `Photo ${index + 1} of ${visible.length}: ${photo.originalName}`;
   byId('position').textContent = `${index + 1} of ${visible.length}`;
-  byId('progress-marker').style.width = `${((index + 1) / visible.length) * 100}%`;
+  byId<HTMLProgressElement>('progress-marker').value = ((index + 1) / visible.length) * 100;
   byId('file-name').textContent = photo.originalName;
   byId('file-meta').textContent = `${formatBytes(photo.size)} · ${photo.type.replace('image/', '').toUpperCase() || 'IMAGE'}`;
   byId('status-ticket').textContent = STATUS_LABEL[photo.status];
@@ -348,6 +381,48 @@ function render(): void {
   byId<HTMLButtonElement>('previous-button').disabled = index === 0;
   byId<HTMLButtonElement>('next-button').disabled = index === visible.length - 1;
   renderThumbnails(visible, index);
+}
+
+async function makeDemoPhotos(): Promise<CatalogPhoto[]> {
+  const samplePhotos = await Promise.all(demoSamples.map(async (sample, index) => {
+    const response = await fetch(`/demo-assets/${sample.file}`);
+    if (!response.ok) throw new Error(`Could not load demo photo ${sample.file}.`);
+    const blob = await response.blob();
+    const file = new File([blob], sample.file, { type: 'image/svg+xml', lastModified: Date.UTC(2026, 6, 12 + index) });
+    const photo = createPhoto(file);
+    photo.status = sample.status;
+    photo.tags = [...sample.tags];
+    photo.note = sample.note;
+    photo.updatedAt = Date.UTC(2026, 6, 20 + index);
+    return photo;
+  }));
+  return samplePhotos;
+}
+
+async function resetDemo(): Promise<void> {
+  if (!isDemo) return;
+  const resetButton = byId<HTMLButtonElement>('reset-demo-button');
+  resetButton.disabled = true;
+  try {
+    await clearPhotos();
+    clearDemoPreferences();
+    photos = await makeDemoPhotos();
+    await replacePhotos(photos);
+    folderName = 'family-photo-sample';
+    localStorage.setItem(localKey('catalog-folder'), folderName);
+    applyPreferences();
+    currentId = photos[0]?.id ?? '';
+    filter = 'all';
+    filterSelect.value = filter;
+    render();
+    announce('Demo reset. Three sample photos are ready.');
+    showToast('Demo reset to its original sample photos.');
+  } catch (error) {
+    console.error(error);
+    showToast('The sample photos could not be loaded. Reload while online and try again.');
+  } finally {
+    resetButton.disabled = false;
+  }
 }
 
 async function importFiles(files: File[]): Promise<void> {
@@ -368,7 +443,7 @@ async function importFiles(files: File[]): Promise<void> {
     filter = 'all';
     filterSelect.value = filter;
     folderName = imageFiles[0].webkitRelativePath?.split('/')[0] || 'selected-photos';
-    localStorage.setItem('catalog-folder', folderName);
+    localStorage.setItem(localKey('catalog-folder'), folderName);
     render();
     announce(`${photos.length} photos ready. Photo 1, ${photos[0].originalName}.`);
     showToast(`${photos.length} photos are ready. They stay on this device.`);
@@ -443,8 +518,8 @@ function exportJson(): void {
 
 function preferences(): { scale: string; contrast: boolean } {
   return {
-    scale: localStorage.getItem('catalog-scale') || 'standard',
-    contrast: localStorage.getItem('catalog-contrast') === 'true',
+    scale: localStorage.getItem(localKey('catalog-scale')) || 'standard',
+    contrast: localStorage.getItem(localKey('catalog-contrast')) === 'true',
   };
 }
 
@@ -458,6 +533,12 @@ function applyPreferences(): void {
 }
 
 document.querySelectorAll<HTMLButtonElement>('#choose-button, #empty-choose-button').forEach((button) => button.addEventListener('click', openFolderPicker));
+byId('reset-demo-button').addEventListener('click', () => void resetDemo());
+byId('start-real-button').addEventListener('click', async () => {
+  await clearPhotos();
+  clearDemoPreferences();
+  window.location.assign('/');
+});
 folderInput.addEventListener('change', () => {
   pendingFiles = [...(folderInput.files ?? [])];
   if (!pendingFiles.length) return;
@@ -558,11 +639,11 @@ byId<HTMLInputElement>('json-input').addEventListener('change', async (event) =>
 byId('settings-button').addEventListener('click', () => settingsDialog.showModal());
 byId('help-button').addEventListener('click', () => helpDialog.showModal());
 document.querySelectorAll<HTMLInputElement>('input[name="text-size"]').forEach((radio) => radio.addEventListener('change', () => {
-  localStorage.setItem('catalog-scale', radio.value);
+  localStorage.setItem(localKey('catalog-scale'), radio.value);
   applyPreferences();
 }));
 byId<HTMLInputElement>('contrast-toggle').addEventListener('change', (event) => {
-  localStorage.setItem('catalog-contrast', String((event.currentTarget as HTMLInputElement).checked));
+  localStorage.setItem(localKey('catalog-contrast'), String((event.currentTarget as HTMLInputElement).checked));
   applyPreferences();
 });
 byId('clear-button').addEventListener('click', () => clearDialog.showModal());
@@ -571,7 +652,7 @@ clearDialog.addEventListener('close', async () => {
   await clearPhotos();
   photos = [];
   currentId = '';
-  localStorage.removeItem('catalog-folder');
+  localStorage.removeItem(localKey('catalog-folder'));
   settingsDialog.close();
   render();
   showToast('Saved catalog cleared. Original files were not changed.');
@@ -638,7 +719,7 @@ async function registerServiceWorker(): Promise<void> {
       });
     });
     navigator.serviceWorker.addEventListener('message', (event) => {
-      if (event.data?.type === 'UPDATE_READY') showToast('Large Type Catalog was updated for offline use.');
+      if (event.data?.type === 'APP_UPDATED') showToast('The catalog was updated and is ready offline.');
     });
   } catch (error) { console.error('Offline setup failed', error); }
 }
@@ -648,6 +729,12 @@ async function start(): Promise<void> {
   byId('offline-banner').hidden = navigator.onLine;
   try {
     photos = await loadPhotos();
+    if (isDemo && !photos.length) {
+      photos = await makeDemoPhotos();
+      await replacePhotos(photos);
+      folderName = 'family-photo-sample';
+      localStorage.setItem(localKey('catalog-folder'), folderName);
+    }
     currentId = photos[0]?.id ?? '';
   } catch (error) {
     console.error(error);

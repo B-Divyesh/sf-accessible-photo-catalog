@@ -1,0 +1,79 @@
+[
+  {
+    "id": "demo-isolation",
+    "claim": "The one-click demo uses sample data in separate storage and can be reset or discarded.",
+    "where": "first screen, demo banner, README",
+    "test": "npm run test:e2e -- --grep @claim:demo-isolation",
+    "sandbox": "fresh browser context; enter /demo from the root; change and reset sample data; confirm real keys remain separate"
+  },
+  {
+    "id": "local-only",
+    "claim": "Photos and catalog data stay in this browser and are never uploaded.",
+    "where": "first screen, footer, privacy page, README",
+    "test": "npm run test:e2e -- --grep @claim:local-only",
+    "sandbox": "fresh /demo context; record every request during classify, tag, and export; assert every request is same-origin"
+  },
+  {
+    "id": "keyboard-workflow",
+    "claim": "The full sorting workflow works with keyboard shortcuts.",
+    "where": "first screen, keyboard dialog, README",
+    "test": "npm run test:e2e -- --grep @claim:keyboard-workflow",
+    "sandbox": "fresh /demo context; classify, navigate, tag, and queue a filename using only keys"
+  },
+  {
+    "id": "csv-export",
+    "claim": "CSV export contains one complete row per catalog photo.",
+    "where": "toolbar, privacy page, README",
+    "test": "npm run test:e2e -- --grep @claim:csv-export",
+    "sandbox": "fresh /demo context; download and inspect CSV header and all three sample rows"
+  },
+  {
+    "id": "browser-persistence",
+    "claim": "Catalog decisions and notes survive a browser reload.",
+    "where": "privacy page, README",
+    "test": "npm run test:e2e -- --grep @claim:browser-persistence",
+    "sandbox": "fresh /demo context; edit a note and decision, reload, and assert both values"
+  },
+  {
+    "id": "pwa-install",
+    "claim": "The catalog is installable as a standalone PWA after an online visit.",
+    "where": "display dialog, README",
+    "test": "npm run test:e2e -- --grep @claim:pwa-install",
+    "sandbox": "fresh /demo context; validate manifest identity/icons/display and an active controlling service worker"
+  },
+  {
+    "id": "offline-reload",
+    "claim": "The populated catalog reloads offline after the first visit.",
+    "where": "first screen, README",
+    "test": "npm run test:e2e -- --grep @claim:offline-reload",
+    "sandbox": "fresh /demo context; wait for service-worker control, disable network, reload, and assert sample data and offline state"
+  },
+  {
+    "id": "backup-roundtrip",
+    "claim": "A JSON backup exports reusable metadata without photo bytes and restores it.",
+    "where": "display dialog, privacy page, README",
+    "test": "npm run test:e2e -- --grep @claim:backup-roundtrip",
+    "sandbox": "fresh /demo context; export JSON, inspect it, reset, import it, and assert restored status"
+  },
+  {
+    "id": "original-files-safe",
+    "claim": "Sorting and queued filenames do not change original photo files.",
+    "where": "workspace, terms page, README",
+    "test": "npm run test:e2e -- --grep @claim:original-files-safe",
+    "sandbox": "fresh /demo context; import fixture folder, classify and queue a name, then compare fixture SHA-256"
+  },
+  {
+    "id": "accessible-display",
+    "claim": "The catalog supports three text sizes, high contrast, reduced motion, keyboard focus, and a 390px layout.",
+    "where": "display dialog, README",
+    "test": "npm run test:e2e -- --grep @claim:accessible-display",
+    "sandbox": "fresh 390px /demo context with reduced motion; set largest/high contrast, inspect focus and overflow, run axe"
+  },
+  {
+    "id": "filter-undo",
+    "claim": "Decision filters work and the last classification can be undone.",
+    "where": "workspace, README",
+    "test": "npm run test:e2e -- --grep @claim:filter-undo",
+    "sandbox": "fresh /demo context; classify, filter to that status, undo, and assert the item returns to its prior status"
+  }
+]
