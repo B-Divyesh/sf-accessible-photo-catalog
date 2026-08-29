@@ -1,3 +1,21 @@
+# Independent verification handoff — PASS
+
+**Independent verifier work order:** `accessible-photo-catalog-verify-2`
+**Tested commit:** `49d2c4721553b230e8e16af5e34441012f4914e6`
+**Tested URL:** <https://accessible-photo-catalog.sociobot.in/>
+**Result:** **PASS — ready for release.**
+
+Fresh independent evidence is recorded in
+[`.factory/verification-2.md`](verification-2.md). All 11 registered claim
+commands passed from the clean candidate checkout. The live deployment
+byte-matches the candidate build and passed the first-read, demo, keyboard,
+privacy, responsive/accessibility, offline, and service-worker-update checks.
+No product defects remain open. The Lighthouse CLI could not complete in this
+container because its Puppeteer/Chromium connection closed; this was a tooling
+limitation, not a product failure.
+
+---
+
 # Repair handoff — Large Type Catalog
 
 Work order: `accessible-photo-catalog-repair-1`
