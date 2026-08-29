@@ -1,4 +1,38 @@
-# Repair handoff — 2026-08-29
+# Review 2 handoff — 2026-08-29
+
+Adversarial first-read review 2 is complete at commit `64f43d5`. The result is
+**FAIL** with 11 findings in `.factory/review-2.md`. No product code was
+modified.
+
+The first screen passed at 390×844 and 1440×900, the one-click demo and storage
+isolation worked, all 14 exact claim commands passed independently from a fresh
+clone, and the live full Playwright suite passed 27/27. `npm test`, typecheck,
+lint, build, root/demo `verify-url.sh`, metadata/404/link checks, request
+logging, and the prior F-1-1 through F-1-14 repairs were also verified.
+
+The release blocker is the false workspace sentence “Decisions are written
+only to your export”; decisions are also persisted to IndexedDB. Remaining
+findings cover a stale Privacy deletion path, inconsistent storage terms,
+unregistered folder/nearby claims, several metaphor/jargon labels, a misleading
+help-dialog button, and demo order changing after reload.
+
+Verification commands:
+
+```text
+npm ci
+npm test
+npm run typecheck
+npm run lint
+npm run build
+PLAYWRIGHT_BASE_URL=https://accessible-photo-catalog.sociobot.in npm run test:e2e
+```
+
+Next step: resolve every finding in `.factory/review-2.md`, add the specified
+claim and regression coverage, deploy, and repeat the full adversarial review.
+
+---
+
+# Earlier repair handoff — 2026-08-29
 
 ## Independent verifier handoff — verification 4
 
