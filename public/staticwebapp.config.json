@@ -15,8 +15,7 @@
       "route": "/sw.js",
       "headers": { "Cache-Control": "no-cache" }
     },
-    { "route": "/demo", "rewrite": "/index.html" },
-    { "route": "/demo/", "rewrite": "/index.html" }
+    { "route": "/demo", "rewrite": "/index.html" }
   ],
   "responseOverrides": {
     "404": { "rewrite": "/404.html" }

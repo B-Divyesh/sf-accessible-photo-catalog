@@ -34,6 +34,8 @@ describe('release contract', () => {
     expect(config.globalHeaders['Content-Security-Policy']).toContain("frame-ancestors 'none'");
     expect(config.globalHeaders['Permissions-Policy']).toContain('camera=()');
     expect(config.routes.every((route) => !(route.rewrite && route.statusCode))).toBe(true);
+    const normalizedRoutes = config.routes.map((route) => route.route.replace(/\/$/, ''));
+    expect(new Set(normalizedRoutes).size).toBe(normalizedRoutes.length);
   });
 
   it('ships complete route metadata, sitemap, and designed not-found page', () => {
