@@ -1,67 +1,57 @@
-# Polish handoff — 2026-08-29
+# Verification handoff — 2026-08-29
 
-**Work order:** `accessible-photo-catalog-polish-1`
-**Repair commit:** `12f7dbfee46043560402008ef3ffd3a508bff686`
-**Deployment:** Azure Static Web Apps deployment `6fcb1748-89ed-42d8-8294-6fd61cdd3819`
+**Work order:** `accessible-photo-catalog-verify-3`
+**Candidate:** `1b0c344704c4db67f0d9dfb1d5f87f93d978994c`
 **Live:** <https://accessible-photo-catalog.sociobot.in/>
-**Result:** PASS — no known gaps.
+**Result:** **FAIL — do not release.**
 
-## Completed work
+Independent QA is recorded in
+[verification-3.md](verification-3.md). No product code was changed.
 
-- Resolved all 14 findings in `review-1.md`; the detailed finding-to-evidence
-  map is in [polish-1.md](polish-1.md).
-- Kept the art-deco observation-deck identity while adding shared header
-  navigation, an accessible populated-demo heading, route focus behavior, a
-  working 404 skip target, and the required landing explanations.
-- Rewrote the flagged README language in plain words and removed the untested
-  multi-browser support claim. The current release is explicitly verified in
-  Chromium.
-- Added the verb-first catalog description and updated the copy audit.
+## Why it fails
 
-## Verification
+- **P0:** the exact **“Try it with sample data”** action is below the cold first
+  viewport at both 1440×900 and 390×844. Mobile also puts the audience sentence
+  below the first screen. This directly fails the work order's mandatory
+  first-read gate.
+- **P1:** 200% text resize creates horizontal overflow on the root and clips
+  controls/text in the demo.
+- **P1:** several public privacy/free/clear-data/dependency promises are not
+  registered in `.factory/claims.json` with one matching claim test.
+- **P2:** Escape does not close the settings dialog when a radio/checkbox has
+  focus; multiple mobile targets are under 44px; malformed backup JSON exposes
+  a parser error instead of a plain recovery message.
 
-From the repair checkout:
+## What passed
 
-```sh
-npm test                 # 9 passed
-npm run lint             # passed
-npm run build            # passed; dist/ generated
-npm run test:e2e         # 18 Chromium tests passed
-```
+- The checkout began clean at the candidate. `npm ci` succeeded with zero
+  vulnerabilities.
+- Every one of the 11 declared claim commands passed separately before other
+  QA.
+- `npm test` (9), typecheck, lint, production build, and local Playwright (18)
+  passed. All 18 Playwright tests also passed against the live deployment.
+- The live deployment byte-matches fresh candidate output for HTML, app JS,
+  CSS, service worker, manifest, and 404.
+- Core demo sorting/export/persistence, boundary and recovery paths, privacy
+  request logging, security/caching headers, route crawl, axe, keyboard focus,
+  390px layout, reduced motion, offline reload, and service-worker update all
+  otherwise passed.
+- Fresh mobile Lighthouse: Performance 91, Accessibility 100, Best Practices
+  100, SEO 100; LCP 1.3s and CLS 0.006. Initial JS is 31,397 bytes, CSS 20,461
+  bytes, and the AVIF hero 47,421 bytes.
 
-From a fresh clone at `/tmp/accessible-photo-catalog-clean-TbdUmv`:
-
-```sh
-npm ci && npm run build  # passed
-```
-
-Each of the 11 commands in `.factory/claims.json` then passed independently:
-`demo-isolation`, `local-only`, `keyboard-workflow`, `csv-export`,
-`browser-persistence`, `pwa-install`, `offline-reload`, `backup-roundtrip`,
-`original-files-safe`, `accessible-display`, and `filter-undo`.
-The demo-isolation test also directly verifies the `?demo=1` sample URL,
-including its banner and visible sample-catalog heading.
-
-After deployment, `PLAYWRIGHT_BASE_URL=https://accessible-photo-catalog.sociobot.in npm run test:e2e`
-passed all 18 tests. This includes the claim, privacy request, offline,
-keyboard, mobile, route, 404, and axe checks.
-
-`verify-url.sh` cold checks passed for `/` and `/demo`; evidence is in
-[`evidence/polish-1`](evidence/polish-1). The live root had no console errors,
-one h1, `lang=en`, a main landmark, and no images missing alt text. Lighthouse
-12.8.2 on the live root scored Performance 100, Accessibility 100, Best
-Practices 100, and SEO 100 (FCP 0.9 s, LCP 1.2 s, CLS 0.006, TBT 0 ms).
-
-## Run and deploy
+## Reproduce
 
 ```sh
 npm ci
 npm test
+npm run typecheck
 npm run lint
 npm run build
 npm run test:e2e
-/opt/fleet/lib/deploy-static.sh accessible-photo-catalog dist
+PLAYWRIGHT_BASE_URL=https://accessible-photo-catalog.sociobot.in npm run test:e2e
 ```
 
-No external runtime services, analytics, or photo uploads are used. The demo
-remains isolated under the documented `demo:` storage namespace.
+Do not treat the earlier deployment-only failure as current: manifest MIME,
+headers, caching, routing, offline behavior, and deployment identity all pass.
+The current blockers are product/acceptance issues listed above.
