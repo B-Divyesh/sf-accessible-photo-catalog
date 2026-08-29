@@ -1,0 +1,14 @@
+{
+  "url": "https://accessible-photo-catalog.sociobot.in/demo",
+  "loadMs": 906,
+  "errors": [],
+  "a11y": {
+    "title": "Demo — Large Type Catalog",
+    "lang": "en",
+    "h1": 1,
+    "main": true,
+    "imgsMissingAlt": 0,
+    "buttonsUnlabeled": 0,
+    "textLength": 865
+  }
+}
