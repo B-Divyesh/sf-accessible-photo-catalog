@@ -44,6 +44,8 @@ export function parseTags(value: string): string[] {
 }
 
 export function safeProposedName(value: string, originalName: string): string {
+  // Control characters and filesystem separators are unsafe in queued filenames.
+  // eslint-disable-next-line no-control-regex
   const cleaned = value.trim().replace(/[\\/:*?"<>|\u0000-\u001f]/g, '-').replace(/\.+$/g, '');
   if (!cleaned) return originalName;
   const originalExtension = originalName.includes('.') ? `.${originalName.split('.').pop()}` : '';

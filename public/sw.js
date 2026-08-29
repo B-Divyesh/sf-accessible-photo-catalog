@@ -1,10 +1,5 @@
-const CACHE = 'large-type-catalog-v1';
-const APP_SHELL = [
-  '/', '/index.html', '/manifest.webmanifest', '/offline.html', '/robots.txt',
-  '/privacy/', '/terms/', '/icons/icon.svg', '/icons/icon-192.png',
-  '/icons/icon-512.png', '/icons/icon-maskable-512.png',
-  '/assets/empty-observation.avif', '/assets/empty-observation.webp', '/assets/empty-observation.jpg'
-];
+const CACHE = 'large-type-catalog-dev';
+const APP_SHELL = ['/'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(APP_SHELL)).then(() => self.skipWaiting()));
@@ -22,7 +17,7 @@ self.addEventListener('activate', (event) => {
       .then(() => self.clients.claim())
       .then(() => self.clients.matchAll({ type: 'window' }))
       .then((clients) => {
-        if (isUpdate) clients.forEach((client) => client.postMessage({ type: 'UPDATE_READY' }));
+        if (isUpdate) clients.forEach((client) => client.postMessage({ type: 'APP_UPDATED', version: CACHE }));
       }),
   );
 });
@@ -37,10 +32,10 @@ self.addEventListener('fetch', (event) => {
       fetch(event.request)
         .then((response) => {
           const copy = response.clone();
-          caches.open(CACHE).then((cache) => cache.put(event.request, copy));
+          caches.open(CACHE).then((cache) => cache.put(url.pathname, copy));
           return response;
         })
-        .catch(async () => (await caches.match(event.request)) || (await caches.match('/index.html')) || caches.match('/offline.html')),
+        .catch(async () => (await caches.match(url.pathname)) || (await caches.match('/index.html')) || caches.match('/offline.html')),
     );
     return;
   }

@@ -5,25 +5,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#17242d" />
     <meta name="description" content="Privacy information for Large Type Catalog." />
+    <link rel="canonical" href="https://accessible-photo-catalog.sociobot.in/privacy/" />
     <link rel="icon" href="/icons/icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Privacy — Large Type Catalog" />
+    <meta property="og:description" content="Privacy information for Large Type Catalog." />
+    <meta property="og:url" content="https://accessible-photo-catalog.sociobot.in/privacy/" />
+    <meta property="og:image" content="https://accessible-photo-catalog.sociobot.in/assets/social-card.jpg" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Privacy — Large Type Catalog" />
+    <meta name="twitter:description" content="Privacy information for Large Type Catalog." />
+    <meta name="twitter:image" content="https://accessible-photo-catalog.sociobot.in/assets/social-card.jpg" />
     <title>Privacy — Large Type Catalog</title>
   </head>
   <body>
-    <header class="masthead"><a class="identity" href="/"><svg class="mark" viewBox="0 0 64 64" aria-hidden="true"><path d="M4 46 32 6l28 40H4Z"/><circle cx="32" cy="34" r="10"/><path d="M10 52h44v7H10z"/></svg><span><span class="eyebrow">Private observation desk</span><span class="wordmark">Large Type Catalog</span></span></a></header>
-    <main class="legal-page" tabindex="-1">
+    <a class="skip-link" href="#main">Skip to main content</a>
+    <header class="masthead"><a class="identity" href="/"><svg class="mark" viewBox="0 0 64 64" aria-hidden="true"><path d="M4 46 32 6l28 40H4Z"/><circle cx="32" cy="34" r="10"/><path d="M10 52h44v7H10z"/></svg><span><span class="eyebrow">Private photo sorter</span><span class="wordmark">Large Type Catalog</span></span></a></header>
+    <main class="legal-page" id="main" tabindex="-1">
       <a class="back-link" href="/">← Return to catalog</a>
       <h1>Privacy</h1>
       <p class="lede">Your photos stay on your device. Large Type Catalog has no account, analytics, advertising, or upload service.</p>
       <h2>What is stored</h2>
-      <p>When you choose a folder, the browser stores local copies of its image files and your decisions, tags, queued filenames, and notes in IndexedDB. Display preferences and the folder label are stored in local storage. This data stays inside this browser profile so the catalog survives a refresh and works offline.</p>
+      <p>When you choose a folder, IndexedDB stores local copies of its images and your catalog details. Those details include decisions, tags, queued filenames, and notes. Local storage holds your display preferences and folder label. The catalog then survives a refresh and works offline.</p>
       <h2>What leaves your device</h2>
-      <p>Nothing from your catalog is sent to us. The production host may keep standard short-lived server access logs needed to deliver the app, such as an IP address, requested page, and time. We do not add cookies or tracking scripts.</p>
+      <p>Nothing from your catalog is sent to us. The host may keep short-lived access logs needed to deliver the app. These logs can include an IP address, requested page, and time. We do not add cookies or tracking scripts.</p>
       <h2>Your control</h2>
-      <p>Use “Export CSV” for a readable sidecar or “Export backup” for reusable metadata. Use Display → Clear saved catalog to remove the browser copies and decisions. Clearing site data in browser settings does the same. Original files in your folder are never changed.</p>
+      <p>Use “Export CSV” for a readable sidecar. Use “Export backup” for reusable metadata. Display → Clear saved catalog removes browser copies and decisions. Clearing site data does the same. Original files in your folder are never changed.</p>
       <h2>Contact and changes</h2>
       <p>This free utility is published by Sociobot. Material privacy changes will be dated on this page. Last updated: 28 August 2026.</p>
     </main>
-    <footer><p>Private by design.</p><nav aria-label="Legal"><a href="/privacy/" aria-current="page">Privacy</a><a href="/terms/">Terms</a></nav></footer>
+    <footer><p>Photos and catalog data stay in this browser.</p><nav aria-label="Legal"><a href="/demo">Demo</a><a href="/privacy/" aria-current="page">Privacy</a><a href="/terms/">Terms</a></nav><p>Built by Param Factory · v1.1.0</p></footer>
     <script type="module" src="/src/legal.ts"></script>
   </body>
 </html>

@@ -1,0 +1,4 @@
+html { font: 20px/1.5 Verdana, Arial, sans-serif; background: #f4e9d0; color: #17242d; }
+main { max-width: 44rem; margin: 10vh auto; padding: 2rem; border: 5px solid #17242d; background: #fff9ea; box-shadow: 10px 10px #8b570d; }
+h1 { font-family: "Arial Narrow", Arial, sans-serif; font-size: 3rem; line-height: 1; text-transform: uppercase; }
+a { display: inline-block; min-height: 48px; padding: 0.7rem 1rem; background: #a92e20; color: #fff9ea; font-weight: bold; }
