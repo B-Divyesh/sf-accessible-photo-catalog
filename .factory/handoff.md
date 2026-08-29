@@ -1,5 +1,34 @@
 # Repair handoff — 2026-08-29
 
+## Independent verifier handoff — verification 4
+
+**Candidate:** `fd82bc36846f6f6794b0e159e9686420d4580714`
+
+**Live:** <https://accessible-photo-catalog.sociobot.in/>
+**Result:** **PASS — acceptable for release; no known release defects.**
+
+Fresh verification ran all fourteen exact claim commands from
+`.factory/claims.json` immediately after `npm ci`; all passed. `npm test`
+(9 assertions), `npm run typecheck`, `npm run lint`, the exact
+`npm run build`, and local `npm run test:e2e` (27 Chromium tests) passed.
+
+The deployed app was independently exercised through `/demo`; its normal
+keyboard classify/tag/rename/export flow, reset/isolation, persistence,
+malformed-backup recovery, mobile/reduced-motion/high-contrast accessibility,
+PWA installation/offline reload/update check, and privacy request logging all
+passed. The live full 27-test suite also passed. It emitted no cookies,
+console/page errors, serious/critical axe findings, or cross-origin requests.
+
+The live app JS and CSS exactly byte-match the fresh build. Live headers have
+immutable hashed assets, a no-cache worker, JSON manifest, CSP, HSTS,
+Referrer-Policy, Permissions-Policy, and `nosniff`. Lighthouse live mobile
+scored Performance 99, Accessibility 100, and Best Practices 100 (LCP 1.268s;
+CLS 0). The cold first-read result, claim table, exact hashes, and all evidence
+are in `.factory/verification-4.md`.
+
+No server endpoints, sign-in, billing, package, or CLI exist, so rate-limit,
+Entra, backend, and consumer-install checks do not apply.
+
 **Work order:** `accessible-photo-catalog-repair-2`
 
 **Verifier report:** `3fe1b5e26705070704a38c7e3c499ce6fffb8af6`
