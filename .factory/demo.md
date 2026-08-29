@@ -1,6 +1,7 @@
 # Demo sandbox
 
-Open <https://accessible-photo-catalog.sociobot.in/demo> or select **Try it
+Open <https://accessible-photo-catalog.sociobot.in/demo>, use
+<https://accessible-photo-catalog.sociobot.in/?demo=1>, or select **Try it
 with sample data** on the first screen.
 
 The demo opens three bundled SVG photos: a family picnic marked Keep, a coastal

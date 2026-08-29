@@ -7,6 +7,7 @@ const routes = [
   { path: '/privacy/', title: 'Privacy — Large Type Catalog' },
   { path: '/terms/', title: 'Terms — Large Type Catalog' },
   { path: '/404.html', title: 'Page not found — Large Type Catalog' },
+  { path: '/offline.html', title: 'Offline — Large Type Catalog' },
 ];
 
 test('all routes have metadata, landmarks, one h1, alt text, and no serious axe findings', async ({ page }) => {
@@ -20,6 +21,12 @@ test('all routes have metadata, landmarks, one h1, alt text, and no serious axe 
     await expect(page.locator('main')).toHaveCount(1);
     await expect(page.locator('h1')).toHaveCount(1);
     await expect(page.locator('link[rel="canonical"]')).toHaveCount(1);
+    await expect(page.locator('link[rel="icon"]')).toHaveCount(1);
+    await expect(page.locator('meta[name="description"]')).toHaveCount(1);
+    await expect(page.locator('meta[property="og:title"]')).toHaveCount(1);
+    await expect(page.locator('meta[name="twitter:card"]')).toHaveCount(1);
+    await expect(page.locator('header')).toHaveCount(1);
+    await expect(page.locator('footer')).toHaveCount(1);
     expect(await page.locator('img:not([alt])').count()).toBe(0);
     const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']).analyze();
     expect(results.violations.filter((violation) => ['serious', 'critical'].includes(violation.impact ?? ''))).toEqual([]);
@@ -27,12 +34,14 @@ test('all routes have metadata, landmarks, one h1, alt text, and no serious axe 
   expect(errors).toEqual([]);
 });
 
-test('every internal footer link resolves in the production build', async ({ page, request, baseURL }) => {
-  await page.goto('/');
-  const hrefs = await page.locator('footer a').evaluateAll((links) => links.map((link) => (link as HTMLAnchorElement).href));
-  for (const href of hrefs) {
-    expect(new URL(href).origin).toBe(new URL(baseURL!).origin);
-    expect((await request.get(href)).ok()).toBe(true);
+test('every shared navigation and footer link resolves on every route', async ({ page, request, baseURL }) => {
+  for (const route of routes) {
+    await page.goto(route.path);
+    const hrefs = await page.locator('header a, footer a').evaluateAll((links) => links.map((link) => (link as HTMLAnchorElement).href));
+    for (const href of hrefs) {
+      expect(new URL(href).origin).toBe(new URL(baseURL!).origin);
+      expect((await request.get(href)).ok()).toBe(true);
+    }
   }
 });
 
@@ -48,8 +57,8 @@ test('demo exposes and focuses its route heading on direct, linked, and history 
   await expect(page.getByRole('heading', { name: 'Sort local photos with large controls' })).toBeFocused();
 });
 
-test('shared header navigation and the 404 skip link work on every route', async ({ page }) => {
-  for (const path of ['/', '/demo', '/privacy/', '/terms/', '/404.html']) {
+test('shared header navigation and skip links work on every static route', async ({ page }) => {
+  for (const path of ['/', '/demo', '/privacy/', '/terms/', '/404.html', '/offline.html']) {
     await page.goto(path);
     const header = page.locator('header');
     await expect(header.getByRole('link', { name: 'Demo' })).toBeVisible();
@@ -60,6 +69,10 @@ test('shared header navigation and the 404 skip link work on every route', async
   await page.getByRole('link', { name: 'Skip to main content' }).focus();
   await page.keyboard.press('Enter');
   await expect(page.locator('#main')).toBeFocused();
+
+  await page.goto('/offline.html');
+  await expect(page.locator('#main')).toBeFocused();
+  await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', 'noindex');
 });
 
 test('privacy gives the current path for clearing saved catalog data', async ({ page }) => {

@@ -40,7 +40,7 @@ describe('release contract', () => {
   });
 
   it('ships complete route metadata, sitemap, and designed not-found page', () => {
-    const routes = ['index.html', 'privacy/index.html', 'terms/index.html', '404.html'];
+    const routes = ['index.html', 'privacy/index.html', 'terms/index.html', '404.html', 'offline.html'];
     routes.forEach((route) => {
       const html = readFileSync(route, 'utf8');
       expect(html).toContain('<html lang="en">');
@@ -53,5 +53,7 @@ describe('release contract', () => {
     const sitemap = readFileSync('public/sitemap.xml', 'utf8');
     ['/</loc>', '/demo</loc>', '/privacy/</loc>', '/terms/</loc>'].forEach((route) => expect(sitemap).toContain(route));
     expect(readFileSync('404.html', 'utf8')).toContain('<h1>This page does not exist</h1>');
+    expect(readFileSync('offline.html', 'utf8')).toContain('<meta name="robots" content="noindex" />');
+    expect(readFileSync('offline.html', 'utf8')).toContain('<nav aria-label="Legal">');
   });
 });

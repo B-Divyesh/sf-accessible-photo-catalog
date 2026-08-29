@@ -3,7 +3,7 @@
   "short_name": "Type Catalog",
   "description": "Private, accessible photo sorting with large controls and a complete keyboard workflow.",
   "id": "/",
-  "start_url": "/?source=installed-v1.1.1",
+  "start_url": "/?source=installed-v1.1.2",
   "scope": "/",
   "display": "standalone",
   "orientation": "any",

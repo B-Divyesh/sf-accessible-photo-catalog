@@ -48,6 +48,7 @@ export default defineConfig({
       input: {
         app: resolve(__dirname, 'index.html'),
         notFound: resolve(__dirname, '404.html'),
+        offline: resolve(__dirname, 'offline.html'),
         privacy: resolve(__dirname, 'privacy/index.html'),
         terms: resolve(__dirname, 'terms/index.html'),
       },

@@ -13,6 +13,7 @@ const currentUrlState = new URL(window.location.href);
 const isDemo = currentUrlState.pathname.replace(/\/$/, '') === '/demo' || currentUrlState.searchParams.get('demo') === '1';
 const storagePrefix = isDemo ? 'demo:' : '';
 configureStorage(isDemo);
+document.body.classList.toggle('demo-mode', isDemo);
 document.body.classList.toggle('empty-catalog', !isDemo);
 if (isDemo) {
   document.title = 'Demo — Large Type Catalog';
@@ -40,7 +41,7 @@ app.innerHTML = `
     <span>Changes stay in a separate demo catalog.</span>
     <div><button id="reset-demo-button" type="button">Reset demo</button><button id="start-real-button" type="button">Start for real</button></div>
   </aside>
-  <header class="masthead">
+  <header class="masthead" id="masthead">
     <a class="identity" href="/" aria-label="Large Type Catalog home">
       <svg class="mark" viewBox="0 0 64 64" aria-hidden="true"><path d="M4 46 32 6l28 40H4Z"/><circle cx="32" cy="34" r="10"/><path d="M10 52h44v7H10z"/></svg>
       <span><span class="eyebrow">Private photo sorter</span><span class="wordmark">Large Type Catalog</span></span>
@@ -51,7 +52,7 @@ app.innerHTML = `
       <a href="/terms/">Terms</a>
     </nav>
     <div class="session-count" id="session-count" aria-live="polite">No folder open</div>
-    <nav class="top-actions" aria-label="Catalog actions">
+    <nav class="top-actions" id="top-actions" aria-label="Catalog actions">
       <button class="button primary" id="choose-button" type="button"><span aria-hidden="true">＋</span> Choose folder</button>
       <button class="button" id="export-button" type="button" disabled><span aria-hidden="true">⇩</span> Export CSV</button>
       <button class="button compact" id="settings-button" type="button" aria-haspopup="dialog">Adjust display</button>
@@ -139,6 +140,8 @@ app.innerHTML = `
             <p class="decision-note">Original photos are not deleted or renamed. Your decisions are saved in this browser and included in exports.</p>
           </section>
 
+          <div class="mobile-action-slot" id="mobile-action-slot"></div>
+
           <aside class="details" aria-labelledby="details-title">
             <div class="details-heading">
               <div><p class="eyebrow">Photo details</p><h3 id="details-title">Label this photo</h3></div>
@@ -194,7 +197,7 @@ app.innerHTML = `
   <footer>
     <p>Photos and catalog data stay in this browser.</p>
     <nav aria-label="Legal"><a href="/demo">Demo</a><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a></nav>
-    <p class="generated-note">Built by Param Factory · v1.1.1 · Original generated artwork</p>
+    <p class="generated-note">Built by Param Factory · v1.1.2 · Original generated artwork</p>
   </footer>
 
   <dialog id="settings-dialog" aria-labelledby="settings-title">
@@ -279,6 +282,10 @@ const announcer = byId<HTMLElement>('announcer');
 const toast = byId<HTMLElement>('toast');
 const toastMessage = byId<HTMLElement>('toast-message');
 const undoButton = byId<HTMLButtonElement>('undo-button');
+const masthead = byId<HTMLElement>('masthead');
+const topActions = byId<HTMLElement>('top-actions');
+const mobileActionSlot = byId<HTMLElement>('mobile-action-slot');
+const compactCatalogQuery = window.matchMedia('(max-width: 420px)');
 
 let photos: CatalogPhoto[] = [];
 let currentId = '';
@@ -358,9 +365,15 @@ function comparePhotos(a: CatalogPhoto, b: CatalogPhoto): number {
   return a.relativePath.localeCompare(b.relativePath, undefined, { numeric: true });
 }
 
+function placeCatalogActions(): void {
+  const mobileCatalog = compactCatalogQuery.matches && photos.length > 0;
+  (mobileCatalog ? mobileActionSlot : masthead).append(topActions);
+}
+
 function render(): void {
   const hasPhotos = photos.length > 0;
   document.body.classList.toggle('empty-catalog', !hasPhotos);
+  document.body.classList.toggle('catalog-open', hasPhotos);
   emptyState.hidden = hasPhotos;
   workspace.hidden = !hasPhotos;
   landingDetails.hidden = hasPhotos;
@@ -374,6 +387,7 @@ function render(): void {
   byId<HTMLButtonElement>('export-button').disabled = !hasPhotos;
   byId<HTMLButtonElement>('json-export-button').disabled = !hasPhotos;
   byId<HTMLButtonElement>('clear-button').disabled = !hasPhotos;
+  placeCatalogActions();
   renderCounts();
   if (!hasPhotos) {
     revokeImageUrls();
@@ -751,6 +765,7 @@ document.addEventListener('keydown', (event) => {
 
 window.addEventListener('online', () => { byId('offline-banner').hidden = true; showToast('Back online. Your catalog remained in this browser.'); });
 window.addEventListener('offline', () => { byId('offline-banner').hidden = false; });
+compactCatalogQuery.addEventListener('change', placeCatalogActions);
 window.addEventListener('beforeinstallprompt', (event) => {
   event.preventDefault();
   deferredInstall = event as DeferredInstall;

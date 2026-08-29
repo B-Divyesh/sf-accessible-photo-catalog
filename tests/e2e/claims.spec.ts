@@ -15,8 +15,70 @@ async function openDemo(page: Page): Promise<void> {
   await expect(page.getByRole('heading', { name: 'Photo 1 of 3' })).toBeVisible();
 }
 
+async function seedRealCatalog(page: Page): Promise<void> {
+  await page.evaluate(async () => {
+    const database = await new Promise<IDBDatabase>((resolve, reject) => {
+      const request = indexedDB.open('large-type-catalog', 1);
+      request.onupgradeneeded = () => {
+        if (!request.result.objectStoreNames.contains('photos')) request.result.createObjectStore('photos', { keyPath: 'id' });
+      };
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+    const transaction = database.transaction('photos', 'readwrite');
+    const markerBlob = new Blob(['<svg xmlns="http://www.w3.org/2000/svg" width="32" height="24"><rect width="32" height="24" fill="#176b50"/></svg>'], { type: 'image/svg+xml' });
+    transaction.objectStore('photos').put({
+      id: 'real-catalog-marker',
+      originalName: 'real-family-photo.svg',
+      relativePath: 'private/real-family-photo.svg',
+      proposedName: 'real-family-photo.svg',
+      type: markerBlob.type,
+      size: markerBlob.size,
+      lastModified: 1785456000000,
+      status: 'keep',
+      tags: ['real', 'private'],
+      note: 'This marker belongs to the real catalog.',
+      updatedAt: 1785456000000,
+      blob: markerBlob,
+    });
+    await new Promise<void>((resolve, reject) => {
+      transaction.oncomplete = () => resolve();
+      transaction.onerror = () => reject(transaction.error);
+      transaction.onabort = () => reject(transaction.error);
+    });
+    database.close();
+  });
+}
+
+async function catalogSnapshot(page: Page, databaseName: string): Promise<unknown[]> {
+  return page.evaluate(async (name) => {
+    const database = await new Promise<IDBDatabase>((resolve, reject) => {
+      const request = indexedDB.open(name, 1);
+      request.onupgradeneeded = () => {
+        if (!request.result.objectStoreNames.contains('photos')) request.result.createObjectStore('photos', { keyPath: 'id' });
+      };
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+    const records = await new Promise<Array<Record<string, unknown> & { blob: Blob }>>((resolve, reject) => {
+      const request = database.transaction('photos', 'readonly').objectStore('photos').getAll();
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+    const snapshot = await Promise.all(records.map(async ({ blob, ...metadata }) => ({
+      metadata,
+      blobType: blob.type,
+      bytes: Array.from(new Uint8Array(await blob.arrayBuffer())),
+    })));
+    database.close();
+    return snapshot;
+  }, databaseName);
+}
+
 test('@claim:demo-isolation keeps sample work separate and resets it', async ({ page }) => {
   await page.goto('/');
+  await seedRealCatalog(page);
+  const realCatalogBefore = await catalogSnapshot(page, 'large-type-catalog');
   await page.evaluate(() => localStorage.setItem('catalog-folder', 'real-family-archive'));
   await page.getByRole('link', { name: 'Try it with sample data' }).click();
   await expect(page).toHaveURL(/\/demo$/);
@@ -47,12 +109,21 @@ test('@claim:demo-isolation keeps sample work separate and resets it', async ({ 
   expect(await page.evaluate(() => Object.keys(localStorage).filter((key) => key.startsWith('demo:')).length)).toBeGreaterThan(0);
   await page.getByRole('button', { name: 'Start for real' }).click();
   await expect(page).toHaveURL(/\/$/);
-  await expect(page.getByRole('heading', { name: 'Sort local photos with large controls' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Photo catalog' })).toBeVisible();
+  await expect(page.locator('#file-name')).toHaveText('real-family-photo.svg');
+  expect(await page.evaluate(() => localStorage.getItem('catalog-folder'))).toBe('real-family-archive');
+  expect(await catalogSnapshot(page, 'large-type-catalog')).toEqual(realCatalogBefore);
+  expect(await catalogSnapshot(page, 'demo:large-type-catalog')).toEqual([]);
   expect(await page.evaluate(() => Object.keys(localStorage).some((key) => key.startsWith('demo:')))).toBe(false);
   await page.goto('/?demo=1');
   await expect(page).toHaveTitle('Demo — Large Type Catalog');
   await expect(page.getByText('Demo — sample data, nothing is saved', { exact: true })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Sample photo catalog' })).toBeVisible();
+  await page.getByRole('button', { name: /Reject/ }).click();
+  await page.getByRole('button', { name: 'Reset demo' }).click();
+  await expect(page.locator('#file-name')).toHaveText('coastal-train.svg');
+  await expect(page.locator('#status-ticket')).toHaveText('Review');
+  await expect(page).toHaveURL(/\?demo=1$/);
 });
 
 test('@claim:local-only sends no catalog data off origin', async ({ page, baseURL }) => {
@@ -112,6 +183,35 @@ test('@claim:browser-persistence restores demo decisions and notes after reload'
   await page.locator('#filter-select').selectOption('reject');
   await expect(page.locator('#status-ticket')).toHaveText('Reject');
   await expect(page.locator('#note-input')).toHaveValue('Print two copies for the mantel.');
+});
+
+test('@claim:preference-persistence restores display choices and the demo folder label after reload', async ({ page }) => {
+  await openDemo(page);
+  await page.getByRole('button', { name: 'Adjust display' }).click();
+  await page.getByRole('radio', { name: 'Largest' }).check();
+  await page.getByRole('checkbox', { name: /High contrast/ }).check();
+  await page.getByRole('button', { name: 'Close display settings' }).click();
+
+  const storedBeforeReload = await page.evaluate(() => ({
+    folder: localStorage.getItem('demo:catalog-folder'),
+    scale: localStorage.getItem('demo:catalog-scale'),
+    contrast: localStorage.getItem('demo:catalog-contrast'),
+    keys: Object.keys(localStorage).sort(),
+  }));
+  expect(storedBeforeReload).toEqual({
+    folder: 'family-photo-sample',
+    scale: 'largest',
+    contrast: 'true',
+    keys: ['demo:catalog-contrast', 'demo:catalog-folder', 'demo:catalog-scale'],
+  });
+
+  await page.reload();
+  expect(await page.evaluate(() => getComputedStyle(document.documentElement).fontSize)).toBe('26px');
+  expect(await page.evaluate(() => document.documentElement.dataset.contrast)).toBe('true');
+  expect(await page.evaluate(() => localStorage.getItem('demo:catalog-folder'))).toBe('family-photo-sample');
+  await page.getByRole('button', { name: 'Adjust display' }).click();
+  await expect(page.getByRole('radio', { name: 'Largest' })).toBeChecked();
+  await expect(page.getByRole('checkbox', { name: /High contrast/ })).toBeChecked();
 });
 
 test('@claim:pwa-install exposes an installable manifest and controlled app shell', async ({ page, request }) => {

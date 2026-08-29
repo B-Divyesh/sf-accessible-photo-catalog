@@ -1,1 +1,1 @@
-Sort local photos with large controls, keyboard shortcuts, and browser-only storage.
+Sort one local photo folder with large controls, keyboard shortcuts, and private browser storage.

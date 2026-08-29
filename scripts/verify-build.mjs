@@ -2,7 +2,7 @@ import { readFile, readdir, stat } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
 const root = resolve('dist');
-const required = ['index.html', '404.html', 'privacy/index.html', 'terms/index.html', 'manifest.webmanifest', 'manifest.json', 'sitemap.xml', 'staticwebapp.config.json', 'sw.js'];
+const required = ['index.html', '404.html', 'offline.html', 'privacy/index.html', 'terms/index.html', 'manifest.webmanifest', 'manifest.json', 'sitemap.xml', 'staticwebapp.config.json', 'sw.js'];
 await Promise.all(required.map(async (file) => {
   if (!(await stat(resolve(root, file))).isFile()) throw new Error(`Missing build output: ${file}`);
 }));

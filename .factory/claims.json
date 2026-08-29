@@ -35,6 +35,13 @@
     "sandbox": "fresh /demo context; edit a note and decision, reload, and assert both values"
   },
   {
+    "id": "preference-persistence",
+    "claim": "Display choices and the demo folder label survive a browser reload in separate demo storage.",
+    "where": "privacy page",
+    "test": "npm run test:e2e -- --grep @claim:preference-persistence",
+    "sandbox": "fresh /demo context; change text size and contrast, reload, assert both choices and the folder label, then inspect demo-prefixed keys"
+  },
+  {
     "id": "pwa-install",
     "claim": "The catalog is installable as a standalone PWA after an online visit.",
     "where": "display dialog, README",

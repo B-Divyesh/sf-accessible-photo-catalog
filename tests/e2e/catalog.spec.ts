@@ -74,6 +74,28 @@ test('fits a 390px viewport without horizontal overflow', async ({ page }) => {
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 });
 
+test('shows a real sample photo and filename in the first 390px demo viewport', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/');
+  await page.getByRole('link', { name: 'Try it with sample data' }).click();
+  await expect(page).toHaveURL(/\/demo$/);
+  await expect(page.getByText('Demo — sample data, nothing is saved', { exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Reset demo' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Start for real' })).toBeVisible();
+  await expect(page.locator('#current-image')).toBeVisible();
+  await expect(page.locator('#file-name')).toHaveText('coastal-train.svg');
+
+  for (const locator of [page.locator('#current-image'), page.locator('#file-name')]) {
+    const box = await locator.boundingBox();
+    expect(box).not.toBeNull();
+    expect(box!.y).toBeLessThan(844);
+    expect(box!.y + box!.height).toBeGreaterThan(0);
+  }
+  const filenameBox = await page.locator('#file-name').boundingBox();
+  expect(filenameBox!.y + filenameBox!.height).toBeLessThanOrEqual(844);
+  expect(await page.evaluate(() => scrollY)).toBe(0);
+});
+
 for (const viewport of [
   { name: 'desktop', width: 1440, height: 900 },
   { name: 'mobile', width: 390, height: 844 },
