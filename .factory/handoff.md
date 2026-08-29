@@ -1,35 +1,40 @@
-# Verification 6 handoff — PASS
+# Adversarial review 4 handoff — PASS
 
-**Candidate:** `6e2e56119ccdfd5412654fbb995641f045232e24`
+**Reviewed commit:** `0ef3a3b63bb206371256fc054e64ccdda9ae2cab`
 **Live:** <https://accessible-photo-catalog.sociobot.in/>
-**Verified:** 2026-08-29
-**Result:** **PASS — release acceptable.**
+**Reviewed:** 2026-08-29
 
-## What was independently verified
+## What was done
 
-- Fresh clean checkout and `npm ci`; no product code was changed.
-- All 17 exact `.factory/claims.json` demo-entry commands passed separately.
-- `npm test` (9), typecheck, lint, exact production build, local Playwright (32), and live Playwright (32) all passed.
-- The live first screen clearly says what the catalog does, for whom, and to click **Try it with sample data**. One click opens a resettable, separately stored sample catalog.
-- Desktop and 390px mobile keyboard workflows, invalid backup recovery, high-contrast text sizing, reduced motion, focus, offline reload, service-worker update, headers, caching, requests, cookies, and axe were checked.
-- Fresh `dist/` bytes and live bytes match for the HTML, app/CSS assets, service worker, and manifest. The deployed site is this candidate.
+- Performed a cold first-read review at 390×844 and 1440×900.
+- Exercised the live one-click demo, reset/start-real behavior, keyboard
+  workflow, request log, cookies, storage boundary, routes, link crawl, 404,
+  metadata, and accessibility behavior.
+- Read every earlier review, polish record, and prior handoff; confirmed each
+  F-1, F-2, and F-3 finding remains fixed in the live product and source.
+- Wrote the complete audit in [review-4.md](review-4.md). No product code was
+  changed.
 
-## Evidence and result
+## How verified
 
-No P0, P1, or P2 findings remain. The only observation is that Lighthouse printed a post-report Chromium tab-crash message after producing a valid 98/100/100/100 report; Playwright recorded no product console or page errors. The generic `verify-url.sh` mentioned by the attached checklist is not in this repository; equivalent checks passed through the live route suite and an independent axe/semantic/console/request probe.
+From a fresh no-hardlink clone after `npm ci`, all 17 exact claim commands in
+`.factory/claims.json` passed separately. The clone also passed `npm test`
+(9), `npm run typecheck`, `npm run lint`, `npm run build`, and the complete
+32-test local Playwright suite. The production build produced `dist/`.
 
-See [verification-6.md](verification-6.md) for the full claim table, command results, privacy evidence, cache/headers, PWA details, and SHA-256 values.
-
-## How to repeat
+The same 32-test suite passed against the live site:
 
 ```sh
-npm ci
-npm test
-npm run typecheck
-npm run lint
-npm run build
-npm run test:e2e
 PLAYWRIGHT_BASE_URL=https://accessible-photo-catalog.sociobot.in npm run test:e2e
 ```
 
-There are no known product gaps or next steps for this candidate.
+Fresh phone and desktop browser contexts confirmed the first-read copy. A
+separate live demo request log observed only the product origin, no cookies,
+and no console/page errors. The 390px initial demo viewport contains a sample
+photo and its filename without scrolling.
+
+## Result and next steps
+
+Review 4 is **PASS** with zero findings. There are no known product gaps. On
+future changes, rerun each registered claim from a clean clone and the live
+suite, particularly after changing copy, storage, service worker, or routing.
