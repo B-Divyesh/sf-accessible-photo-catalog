@@ -1,65 +1,68 @@
-# Polish 2 handoff — 2026-08-29
+# Verification 5 handoff — PASS
 
-**Repair commit:** `2a365dc3e623fb2bfaf84231ab51506d8771da47`
+**Verified candidate:** `82fe19d6d9973bd4474b93904919bc6174134d68`
+**Live URL:** <https://accessible-photo-catalog.sociobot.in/>
+**Verified:** 2026-08-29
 
-**Base reviewed:** `fd82bc36846f6f6794b0e159e9686420d4580714`
+## Result
 
-**Work-order deploy:** `e54a36f0-f625-4c99-aa49-12f51edb98a3`
-**Live:** <https://accessible-photo-catalog.sociobot.in/>
+**PASS — acceptable for release.** The checkout began clean at the candidate
+commit. Only this handoff and the companion verification report were changed;
+no product source code was modified.
 
-## Completed
+## What was verified
 
-Polish 2 closes every F-1 and F-2 finding in the adversarial reports. The
-workspace now truthfully explains that decisions are saved in this browser and
-included in exports. Storage wording is consistent, the privacy deletion path
-names the current controls, folder opening and nearby-photo navigation are
-registered claims, and all remaining metaphor/jargon/button labels are plain.
-The sample order is stable across reset, online reload, and offline reload.
+- The live cold first screen says what it does ("Sort local photos with large
+  controls"), who it is for (low-vision people and older family members), and
+  offers the visible one-click **Try it with sample data** action. It opens the
+  isolated three-photo demo with the persistent reset/start-for-real banner.
+- Every one of the 16 exact commands in `.factory/claims.json` passed
+  individually from the demo entry point: `demo-isolation`, `local-only`,
+  `keyboard-workflow`, `csv-export`, `browser-persistence`, `pwa-install`,
+  `offline-reload`, `backup-roundtrip`, `original-files-safe`,
+  `accessible-display`, `filter-undo`, `folder-open`, `private-runtime`,
+  `clear-data`, `browser-data-clear`, and `free-use`.
+- Clean local checks passed: `npm ci` (0 vulnerabilities), `npm test` (9
+  tests), `npm run typecheck`, `npm run lint`, `npm run build`, and
+  `npm run test:e2e` (30 Chromium tests).
+- The same full 30-test Playwright suite passed against the live URL. It
+  covers keyboard sort/tag/rename/export, invalid backup recovery, filters and
+  undo, persistence, 390px layout, 44px touch targets, 200% text reflow,
+  reduced motion, routes/404, and axe scans.
+- A separate live demo session logged only same-origin HTTP requests plus
+  local `blob:` URLs, set no cookies, and produced no console or page errors.
+  Its axe WCAG A/AA scan had zero serious or critical findings.
+- After an online visit, the live service worker controlled `/demo`; an update
+  check retained the versioned `large-type-catalog-adec3203668b` shell. Offline
+  reload showed the demo route and offline banner.
+- The fresh build's live JS, CSS, service worker, and manifest hashes match
+  byte-for-byte. Initial JS is 31,981 B (10.28 KB gzip), and CSS is 21,757 B
+  (5.41 KB gzip), within the static-product budgets. A fresh mobile Lighthouse
+  audit recorded Performance 98, Accessibility 100, Best Practices 100, SEO
+  100, LCP 1,999 ms, CLS 0, TBT 14 ms, and 66,563 B transfer.
 
-The product remains a static, local-first offline PWA with its art-deco
-observation-deck identity. No photo, account, payment, analytics, or cloud API
-was added.
+## Security, privacy, and deployment
 
-## Verification
+Live response headers include a self-only CSP (`connect-src 'self'` and
+`frame-ancestors 'none'`), HSTS, `nosniff`, a strict referrer policy, and a
+permissions policy. HTML revalidates after 30 seconds; hashed JS/CSS are
+immutable for one year; `sw.js` is `no-cache`; and the manifest caches for one
+hour. This is a static local-first PWA with no server-side product API,
+authentication, billing, package, or CLI surface, so rate-limit/429, Entra,
+concurrency, and consumer-package checks do not apply.
 
-From a fresh clone of `2a365dc` in `/tmp/accessible-photo-catalog-clean.9IfrnC`:
+## Defects and follow-up
 
-```text
-npm ci                 PASS — 178 packages, 0 vulnerabilities
-npm test               PASS — 9 tests
-npm run typecheck      PASS
-npm run lint           PASS
-npm run build          PASS — dist/ produced; JS 31,981 B, CSS 21,757 B
-npm run test:e2e       PASS — 30 Chromium tests
-```
+| Severity | Finding |
+| --- | --- |
+| P0 / release-blocking | None |
+| P1 / major | None |
+| P2 / minor | None |
+| P3 / observation | Lighthouse emitted a post-report Chrome teardown message; no product runtime failure was observed. |
 
-Every one of the 16 exact commands in `.factory/claims.json` was also run
-independently in that clean clone and selected one passing test:
+See `.factory/verification-5.md` for the complete independent evidence.
 
-```text
-demo-isolation, local-only, keyboard-workflow, csv-export,
-browser-persistence, pwa-install, offline-reload, backup-roundtrip,
-original-files-safe, accessible-display, filter-undo, folder-open,
-private-runtime, clear-data, browser-data-clear, free-use
-```
-
-The full live run also passed all 30 Chromium tests. It includes offline reload,
-request-origin privacy checks, first-screen 1440×900 and 390×844 checks, 200%
-text reflow, keyboard dialogs, mobile target sizes, metadata/404 links, and
-axe WCAG A/AA scans. `verify-url.sh` then passed the cold live root and demo:
-both returned 200 with zero console errors, `lang=en`, one h1, a main landmark,
-complete image alt text, and labeled buttons. Live evidence is in
-`.factory/evidence/polish-2/live-root/` and `live-demo/`.
-
-The live headers include the self-only CSP with `frame-ancestors 'none'`,
-Permissions-Policy, Referrer-Policy, and `nosniff`; unknown routes return the
-designed HTTP 404.
-
-Live Lighthouse 13.4.1 mobile audit: Performance 100, Accessibility 100, Best
-Practices 100, and SEO 100; FCP 0.9 s, LCP 1.4 s, CLS 0, TBT 0 ms, and 95 KiB
-transferred. The report is `.factory/evidence/polish-2/lighthouse-live.json`.
-
-## Run and deploy
+## Re-run
 
 ```sh
 npm ci
@@ -68,9 +71,5 @@ npm run typecheck
 npm run lint
 npm run build
 npm run test:e2e
-/opt/fleet/lib/deploy-static.sh accessible-photo-catalog dist
+PLAYWRIGHT_BASE_URL=https://accessible-photo-catalog.sociobot.in npm run test:e2e
 ```
-
-See `.factory/polish-2.md` for the required finding-by-finding map.
-
-Known gaps: none.
