@@ -1,0 +1,14 @@
+{
+  "url": "https://accessible-photo-catalog.sociobot.in/offline.html",
+  "loadMs": 970,
+  "errors": [],
+  "a11y": {
+    "title": "Offline — Large Type Catalog",
+    "lang": "en",
+    "h1": 1,
+    "main": true,
+    "imgsMissingAlt": 0,
+    "buttonsUnlabeled": 0,
+    "textLength": 383
+  }
+}
